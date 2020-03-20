@@ -5,13 +5,19 @@ export const useData = ({ url }) => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    csv(url).then(sourceData => {
-      sourceData.forEach(d => (d.date = new Date(d.date)));
+    csv(url, d => ({
+      date: new Date(d.date),
+      location: d.location,
+      new_cases: +d.new_cases,
+      new_deaths: +d.new_deaths,
+      total_cases: +d.total_cases,
+      total_deaths: +d.total_deaths,
+    })).then(sourceData => {
       setData(
         nest()
           .key(d => d.location)
           .sortKeys(ascending)
-          .sortValues((a,b) => a.date - b.date)
+          .sortValues((a, b) => a.date - b.date)
           .map(sourceData)
       );
     });

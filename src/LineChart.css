@@ -1,3 +1,7 @@
 text {
   color: black;
 }
+
+.chart-container {
+  min-height: 500px;
+}

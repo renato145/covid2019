@@ -1,26 +1,45 @@
 import React, { useEffect, useRef } from 'react';
-const d3 = require('d3');
+import { select, line } from 'd3';
+import { useSpring, animated } from 'react-spring';
+import './Marks.css';
 
-export const Marks = ({ data, sex, xScale, yScale, xValue, yValue }) => {
+const Dot = ({ x, y, transition }) => {
+  const ref = useRef();
+
+  const style = useSpring({
+    config: { duration: transition },
+    r: 6,
+    cx: x,
+    cy: y
+  });
+
+  return <animated.circle {...style} ref={ref} />;
+};
+
+export const Marks = ({ data, xScale, yScale, xValue, yValue, transition }) => {
   const path = useRef(null);
   useEffect(() => {
-    d3.select(path.current)
-      .transition().duration(1000)
+    select(path.current)
+      .transition()
+      .duration(1000)
       .attr('d', () =>
-        d3.line()
+        line()
           .x(d => xScale(xValue(d)))
           .y(d => yScale(yValue(d)))
-          .curve(d3.curveBasis)(data.filter(d => d.Sex === sex))
+          (data)
       );
-  }, [ data, sex, xScale, yScale, xValue, yValue ]);
+  }, [data, xScale, yScale, xValue, yValue]);
   return (
-    <g className='marks'>
-      <path
-        className={sex}
-        ref={path}
-        fill='none'
-        stroke='black'
-      />
+    <g className="marks">
+      <path ref={path} />
+      {data.map((d, i) => (
+        <Dot
+          key={i}
+          x={xScale(xValue(d))}
+          y={yScale(yValue(d))}
+          transition={transition}
+        />
+      ))}
     </g>
   );
-}
+};

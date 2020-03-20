@@ -1,0 +1,6 @@
+.marks {
+  fill: none;
+  stroke: black;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}

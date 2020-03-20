@@ -1,13 +1,22 @@
 import React, { useMemo } from 'react';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
+import { Marks } from './Marks';
 import { useChartDimensions } from './useChartDimensions';
 import { scaleTime, extent, scaleLinear } from 'd3';
 import './LineChart.css';
 
-const k = 'Peru';
-
-export const LineChart = ({ title, data, dimensions, xAxis, yAxis }) => {
+export const LineChart = ({
+  title,
+  data,
+  selection,
+  dimensions,
+  xAxis,
+  yAxis,
+  xValues,
+  yValues,
+  transitions,
+}) => {
   const [ref, dms] = useChartDimensions(dimensions);
   const {
     width,
@@ -19,15 +28,14 @@ export const LineChart = ({ title, data, dimensions, xAxis, yAxis }) => {
     boundedHeight,
     boundedWidth,
   } = dms;
-  console.log(dms);
 
   const selectedData = useMemo(() => {
-    if (data) return data[`$${k}`];
-  }, [data]);
+    if (data) return data[`$${selection}`];
+  }, [data, selection]);
 
   const xScale = useMemo(() => {
     if (!selectedData) return;
-    const domain = extent(selectedData.map(d => d.date));
+    const domain = extent(selectedData.map(xValues));
     return scaleTime()
       .domain(domain)
       .range([0, boundedWidth])
@@ -36,26 +44,21 @@ export const LineChart = ({ title, data, dimensions, xAxis, yAxis }) => {
 
   const yScale = useMemo(() => {
     if (!selectedData) return;
-    const domain = [0, 199];
+    const domain = extent(selectedData.map(yValues));
     return scaleLinear()
       .domain(domain)
       .range([boundedHeight, 0])
       .nice();
   }, [selectedData, boundedHeight]);
 
-  // const yScale = d3.scaleLinear()
-  //   .domain([0,maxN])
-  //   .range([innerHeight, 0])
-  //   .nice();
-
   return (
-    <div ref={ref} style={{ minHeight: '300px' }}>
+    <div className='chart-container' ref={ref}>
       <svg width={width} height={height}>
         <g transform={`translate(${marginLeft},${marginTop})`}>
           {title && (
             <text
               className="title"
-              x={boundedWidth/2 + title.dx}
+              x={boundedWidth / 2 + title.dx}
               y={title.dy}
               textAnchor="middle"
             >
@@ -76,27 +79,18 @@ export const LineChart = ({ title, data, dimensions, xAxis, yAxis }) => {
                 boundedWidth={boundedWidth}
                 {...yAxis}
               />
+              <Marks
+                data={selectedData}
+                xScale={xScale}
+                yScale={yScale}
+                xValue={xValues}
+                yValue={yValues}
+                transition={transitions.lines}
+              />
             </>
           ) : (
             <text>Loading...</text>
           )}
-          {/* 
-          <Marks
-            data={filteredData}
-            sex="Male"
-            xScale={xScale}
-            yScale={yScale}
-            xValue={xValue}
-            yValue={yValue}
-          />
-          <Marks
-            data={filteredData}
-            sex="Female"
-            xScale={xScale}
-            yScale={yScale}
-            xValue={xValue}
-            yValue={yValue}
-          /> */}
         </g>
       </svg>
     </div>

@@ -1,37 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
 import { useData } from './useData';
 import { LineChart } from './LineChart';
+import { SelectLocation } from './SelectLocation';
 
 const SOURCE = 'https://covid.ourworldindata.org/data/full_data.csv';
 const chartConfig = {
   title: {
     label: 'Testing',
     dx: 0,
-    dy: -20
+    dy: -20,
+  },
+  dimensions: {
+    marginTop: 40,
+    marginRight: 35,
+    marginBottom: 30,
+    marginLeft: 75,
   },
   xAxis: {
     tickSize: 6,
-    tickOffset: 10
+    tickOffset: 15,
   },
   yAxis: {
     label: 'Cases',
     labelOffset: 50,
     tickSize: 6,
-    tickOffset: 10
+    tickOffset: 10,
   },
-  dimensions: {
-    marginTop: 40,
-    marginRight: 35,
-    marginBottom: 25,
-    marginLeft: 75,
+  xValues: d => d.date,
+  yValues: d => d.total_cases,
+  transitions: {
+    lines: 1000,
   },
 };
 
 function App() {
   const data = useData({ url: SOURCE });
+  const [selection, setSelection] = useState('Peru');
 
   return (
     <Container>
@@ -39,7 +46,12 @@ function App() {
         <h1 className="mt-4 mb-4">Covid 2019</h1>
       </header>
 
-      <LineChart data={data} {...chartConfig} />
+      <SelectLocation
+        locations={data ? data.keys() : [selection]}
+        selection={selection}
+        setSelection={setSelection}
+      />
+      <LineChart data={data} selection={selection} {...chartConfig} />
 
       <footer>
         <Row>
