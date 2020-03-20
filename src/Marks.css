@@ -4,3 +4,7 @@
   stroke-width: 3px;
   stroke-linejoin: round;
 }
+
+.marks circle {
+  fill: grey;
+}
