@@ -4,11 +4,13 @@
   "homepage": "https://renato145.github.io/covid2019/",
   "private": true,
   "dependencies": {
+    "@juggle/resize-observer": "^3.1.2",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
     "bootstrap": "^4.4.1",
     "d3": "^5.15.0",
+    "moment": "^2.24.0",
     "react": "^16.13.0",
     "react-bootstrap": "^1.0.0-beta.16",
     "react-dom": "^16.13.0",
