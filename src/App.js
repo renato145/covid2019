@@ -29,11 +29,11 @@ const chartConfig = {
   },
   xValues: d => d.date,
   yValues: d => d.Confirmed,
-  markRadius: 9,
+  markRadius: 5,
   transitions: {
-    lines: 1000,
+    lines: 500,
   },
-  defaultLocation: 'Peru',
+  defaultLocations: ['Peru', 'Australia'],
 };
 
 function App() {

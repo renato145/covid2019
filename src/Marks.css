@@ -1,10 +1,11 @@
 .marks {
   fill: none;
-  stroke: black;
   stroke-width: 3px;
   stroke-linejoin: round;
+  stroke-opacity: 0.75;
 }
 
 .marks circle {
-  fill: grey;
+  opacity: 0.5;
+  /* fill: grey; */
 }

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { scaleTime, extent, scaleLinear, scaleLog } from 'd3';
+import { scaleTime, extent, scaleLinear, scaleLog, schemeTableau10 } from 'd3';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
@@ -18,7 +18,7 @@ export const LineChart = ({
   yValues,
   markRadius,
   transitions,
-  defaultLocation,
+  defaultLocations,
   onClose,
 }) => {
   const [ref, dms] = useChartDimensions(dimensions);
@@ -33,11 +33,10 @@ export const LineChart = ({
     boundedWidth,
   } = dms;
 
-  const [selection, setSelection] = useState([defaultLocation]);
+  const [selection, setSelection] = useState(defaultLocations);
 
   const selectedData = useMemo(() => {
     if (data) return selection.map(d => data[`$${d}`]);
-    // if (data) return data[`$${selection}`];
   }, [data, selection]);
 
   const xScale = useMemo(() => {
@@ -60,11 +59,11 @@ export const LineChart = ({
 
   return (
     <div className="chart">
-      <Row className="justify-content-center">
+      <Row className="chart-selector justify-content-center">
         <Col md={11}>
           <SelectLocation
             locations={data ? data.keys() : [selection]}
-            defaultLocation={defaultLocation}
+            defaultLocation={defaultLocations}
             onChange={(e, d) => setSelection(d)}
           />
         </Col>
@@ -105,7 +104,7 @@ export const LineChart = ({
                   boundedWidth={boundedWidth}
                   {...yAxis}
                 />
-                {selectedData.map((d,i) => (
+                {selectedData.map((d, i) => (
                   <Marks
                     key={i}
                     data={d}
@@ -115,6 +114,7 @@ export const LineChart = ({
                     yValue={yValues}
                     transition={transitions.lines}
                     radius={markRadius}
+                    color={schemeTableau10[i % schemeTableau10.length]}
                   />
                 ))}
               </>
