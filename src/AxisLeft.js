@@ -1,5 +1,8 @@
 import React, { useMemo } from 'react';
+import { format } from 'd3';
 import './Axis.css';
+
+const formatNumbers = format('.0s')
 
 export const AxisLeft = ({
   yScale,
@@ -32,7 +35,7 @@ export const AxisLeft = ({
             x={-tickOffset}
             dy=".32em"
           >
-            {tickValue}
+            {formatNumbers(tickValue)}
           </text>
         </g>
       ))}

@@ -1,20 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
 import { useData } from './useData';
 import { LineChart } from './LineChart';
-import { range } from 'd3';
 
-const SOURCE = 'https://covid.ourworldindata.org/data/full_data.csv';
 const chartConfig = {
-  title: {
-    label: 'Testing',
-    dx: 0,
-    dy: -20,
-  },
+  // title: {
+  //   label: 'Testing',
+  //   dx: 0,
+  //   dy: -20,
+  // },
   dimensions: {
-    marginTop: 40,
+    marginTop: 10,
     marginRight: 35,
     marginBottom: 30,
     marginLeft: 75,
@@ -30,7 +28,7 @@ const chartConfig = {
     tickOffset: 10,
   },
   xValues: d => d.date,
-  yValues: d => d.total_cases,
+  yValues: d => d.Confirmed,
   markRadius: 9,
   transitions: {
     lines: 1000,
@@ -39,37 +37,61 @@ const chartConfig = {
 };
 
 function App() {
-  const data = useData({ url: SOURCE });
+  const data = useData();
   const [charts, setCharts] = useState([0]);
 
   return (
-    <Container>
+    <Container className="app-container">
       <header>
         <h1 className="mt-4 mb-4">Covid 2019</h1>
       </header>
 
-      <Row>
-        {charts.map(i => (
-          <Col key={i} md={12}>
-            <LineChart data={data} onClose={() => setCharts(d => {
-              const idx = d.indexOf(i);
-              const out = d.slice();
-              out.splice(idx, 1);
-              return out;
-
-            })} {...chartConfig} />
+      <main>
+        <Row>
+          <Col>
+            <p>
+              Plots of coronavirus data (
+              <a href='https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data' target="_black">
+                source
+              </a>
+              ).
+            </p>
           </Col>
-        ))}
-      </Row>
-      <Row className="mt-2">
-        <Col>
-          <Button
-            onClick={() => setCharts(d => d.concat([d[d.length - 1] + 1]))}
-          >
-            Add Chart
-          </Button>
-        </Col>
-      </Row>
+        </Row>
+
+        <Row>
+          {charts.map(i => (
+            <Col key={i} md={12} xl={charts.length > 1 ? 6 : 12}>
+              <LineChart
+                data={data}
+                onClose={() =>
+                  setCharts(d => {
+                    const idx = d.indexOf(i);
+                    const out = d.slice();
+                    out.splice(idx, 1);
+                    return out;
+                  })
+                }
+                {...chartConfig}
+              />
+            </Col>
+          ))}
+        </Row>
+        <Row className="mt-2">
+          <Col className="text-right">
+            <Button
+              onClick={() =>
+                setCharts(d => {
+                  const idx = d.length === 0 ? 0 : d[d.length - 1] + 1;
+                  return d.concat(idx);
+                })
+              }
+            >
+              Add Chart
+            </Button>
+          </Col>
+        </Row>
+      </main>
 
       <footer>
         <Row>

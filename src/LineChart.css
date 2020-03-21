@@ -2,8 +2,19 @@ text {
   color: black;
 }
 
+.chart {
+  height: 80%;
+  margin: 1rem 0px;
+}
+
 .chart-container {
+  height: 100%;
   min-height: 100px;
   max-height: 600px;
   margin-top: 1em;
+}
+
+.close-button {
+  padding: 0rem 0.4rem;
+  border: 0px;
 }

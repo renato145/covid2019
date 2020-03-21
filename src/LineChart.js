@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { scaleTime, extent, scaleLinear } from 'd3';
+import { scaleTime, extent, scaleLinear, scaleLog } from 'd3';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
@@ -33,15 +33,16 @@ export const LineChart = ({
     boundedWidth,
   } = dms;
 
-  const [selection, setSelection] = useState(defaultLocation);
+  const [selection, setSelection] = useState([defaultLocation]);
 
   const selectedData = useMemo(() => {
-    if (data) return data[`$${selection}`];
+    if (data) return selection.map(d => data[`$${d}`]);
+    // if (data) return data[`$${selection}`];
   }, [data, selection]);
 
   const xScale = useMemo(() => {
     if (!selectedData) return;
-    const domain = extent(selectedData.map(xValues));
+    const domain = extent(selectedData.map(d => d.map(xValues)).flat());
     return scaleTime()
       .domain(domain)
       .range([0, boundedWidth])
@@ -50,7 +51,7 @@ export const LineChart = ({
 
   const yScale = useMemo(() => {
     if (!selectedData) return;
-    const domain = extent(selectedData.map(yValues));
+    const domain = extent(selectedData.map(d => d.map(yValues)).flat());
     return scaleLinear()
       .domain(domain)
       .range([boundedHeight, 0])
@@ -58,22 +59,26 @@ export const LineChart = ({
   }, [selectedData, yValues, boundedHeight]);
 
   return (
-    <div className="mt-3 mb-3 h-75">
+    <div className="chart">
       <Row className="justify-content-center">
         <Col md={11}>
           <SelectLocation
             locations={data ? data.keys() : [selection]}
-            selection={selection}
-            setSelection={setSelection}
+            defaultLocation={defaultLocation}
+            onChange={(e, d) => setSelection(d)}
           />
         </Col>
         <Col md={1}>
-          <Button variant="outline-danger" size="sm" onClick={onClose}>
+          <Button
+            variant="outline-danger close-button"
+            size="sm"
+            onClick={onClose}
+          >
             <span>x</span>
           </Button>
         </Col>
       </Row>
-      <div className="chart-container h-100" ref={ref}>
+      <div className="chart-container" ref={ref}>
         <svg width={width} height={height}>
           <g transform={`translate(${marginLeft},${marginTop})`}>
             {title && (
@@ -100,15 +105,18 @@ export const LineChart = ({
                   boundedWidth={boundedWidth}
                   {...yAxis}
                 />
-                <Marks
-                  data={selectedData}
-                  xScale={xScale}
-                  yScale={yScale}
-                  xValue={xValues}
-                  yValue={yValues}
-                  transition={transitions.lines}
-                  radius={markRadius}
-                />
+                {selectedData.map((d,i) => (
+                  <Marks
+                    key={i}
+                    data={d}
+                    xScale={xScale}
+                    yScale={yScale}
+                    xValue={xValues}
+                    yValue={yValues}
+                    transition={transitions.lines}
+                    radius={markRadius}
+                  />
+                ))}
               </>
             ) : (
               <text>Loading...</text>
