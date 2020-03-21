@@ -41,7 +41,6 @@ export const Marks = ({
           .y(d => yScale(yValue(d)))(data);
         return interpolatePath(prev, current);
       });
-      console.log(transition);
   }, [data, xScale, yScale, xValue, yValue, transition]);
 
   return (

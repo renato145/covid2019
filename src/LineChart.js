@@ -1,5 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { scaleTime, extent, scaleLinear, scaleLog, schemeTableau10 } from 'd3';
+import {
+  scaleTime,
+  extent,
+  max,
+  scaleLinear,
+  scaleLog,
+  scaleSymlog,
+  schemeTableau10,
+} from 'd3';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
@@ -50,8 +58,9 @@ export const LineChart = ({
 
   const yScale = useMemo(() => {
     if (!selectedData) return;
-    const domain = extent(selectedData.map(d => d.map(yValues)).flat());
-    return scaleLinear()
+    const domain = [0.1, max(selectedData.map(d => d.map(yValues)).flat())];
+    // return scaleSymlog()
+    return scaleLog()
       .domain(domain)
       .range([boundedHeight, 0])
       .nice();

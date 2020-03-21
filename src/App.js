@@ -26,14 +26,15 @@ const chartConfig = {
     labelOffset: 50,
     tickSize: 6,
     tickOffset: 10,
+    tickHeight: 100
   },
   xValues: d => d.date,
-  yValues: d => d.Confirmed,
+  yValues: d => d.Confirmed === 0 ? 0.1 : d.Confirmed,
   markRadius: 5,
   transitions: {
     lines: 500,
   },
-  defaultLocations: ['Peru', 'Australia'],
+  defaultLocations: ['Peru', 'Australia', 'Iran', 'Italy'],
 };
 
 function App() {
