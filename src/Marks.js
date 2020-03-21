@@ -4,12 +4,11 @@ import { interpolatePath } from 'd3-interpolate-path';
 import { useSpring, animated } from 'react-spring';
 import './Marks.css';
 
-const Dot = ({ x, y, r, fill, transition }) => {
+const Dot = ({ x, y, fill, transition }) => {
   const ref = useRef();
 
   const style = useSpring({
     config: { duration: transition, easing: easeCubic },
-    r: r,
     cx: x,
     cy: y,
     fill: fill
@@ -25,7 +24,6 @@ export const Marks = ({
   xValue,
   yValue,
   transition,
-  radius,
   color,
 }) => {
   const path = useRef(null);
@@ -51,7 +49,6 @@ export const Marks = ({
           key={i}
           x={xScale(xValue(d))}
           y={yScale(yValue(d))}
-          r={radius}
           fill={color}
           transition={transition}
         />

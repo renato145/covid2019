@@ -3,9 +3,7 @@ import {
   scaleTime,
   extent,
   max,
-  scaleLinear,
   scaleLog,
-  scaleSymlog,
   schemeTableau10,
 } from 'd3';
 import { AxisBottom } from './AxisBottom';
@@ -24,7 +22,6 @@ export const LineChart = ({
   yAxis,
   xValues,
   yValues,
-  markRadius,
   transitions,
   defaultLocations,
   onClose,
@@ -59,7 +56,6 @@ export const LineChart = ({
   const yScale = useMemo(() => {
     if (!selectedData) return;
     const domain = [0.1, max(selectedData.map(d => d.map(yValues)).flat())];
-    // return scaleSymlog()
     return scaleLog()
       .domain(domain)
       .range([boundedHeight, 0])
@@ -122,7 +118,6 @@ export const LineChart = ({
                     xValue={xValues}
                     yValue={yValues}
                     transition={transitions.lines}
-                    radius={markRadius}
                     color={schemeTableau10[i % schemeTableau10.length]}
                   />
                 ))}

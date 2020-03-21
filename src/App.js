@@ -20,6 +20,7 @@ const chartConfig = {
   xAxis: {
     tickSize: 6,
     tickOffset: 15,
+    tickWidth: 130
   },
   yAxis: {
     label: 'Cases',
@@ -30,7 +31,6 @@ const chartConfig = {
   },
   xValues: d => d.date,
   yValues: d => d.Confirmed === 0 ? 0.1 : d.Confirmed,
-  markRadius: 5,
   transitions: {
     lines: 500,
   },

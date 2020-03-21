@@ -7,5 +7,11 @@
 
 .marks circle {
   opacity: 0.5;
+  r: 5;
+  transition: r 0.2s ease-out;
   /* fill: grey; */
+}
+
+.marks circle:hover {
+  r: 15;
 }
