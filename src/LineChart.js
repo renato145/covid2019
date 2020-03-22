@@ -91,6 +91,43 @@ export const LineChart = ({
     });
   }, [data, selection]);
 
+  const marks = useMemo(() => {
+    if (selectedData)
+      return (
+        <>
+          {selectedData.map((d, i) => {
+            const location = d[0]['Country/Region'];
+            const color =
+              schemeTableau10[colors[location] % schemeTableau10.length];
+
+            return (
+              <Marks
+                key={location}
+                data={d}
+                xScale={xScale}
+                yScale={yScale}
+                xValue={xValues}
+                yValue={yValues}
+                transition={transitions.lines}
+                color={color}
+                getToolTipText={getToolTipText}
+                setToolTipData={setToolTipData}
+              />
+            );
+          })}
+        </>
+      );
+  }, [
+    colors,
+    getToolTipText,
+    selectedData,
+    transitions.lines,
+    xScale,
+    xValues,
+    yScale,
+    yValues,
+  ]);
+
   return (
     <div className="chart">
       <Row className="chart-selector justify-content-center">
@@ -149,26 +186,7 @@ export const LineChart = ({
                   boundedWidth={boundedWidth}
                   {...yAxis}
                 />
-                {selectedData.map((d, i) => {
-                  const location = d[0]['Country/Region'];
-                  const key = colors[location];
-                  const color = schemeTableau10[key % schemeTableau10.length];
-
-                  return (
-                    <Marks
-                      key={key ? key : i}
-                      data={d}
-                      xScale={xScale}
-                      yScale={yScale}
-                      xValue={xValues}
-                      yValue={yValues}
-                      transition={transitions.lines}
-                      color={color}
-                      getToolTipText={getToolTipText}
-                      setToolTipData={setToolTipData}
-                    />
-                  );
-                })}
+                {marks}
               </>
             ) : (
               <text>Loading...</text>
