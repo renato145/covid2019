@@ -68,7 +68,7 @@ function App() {
         <h1 className="mt-4 mb-4">Covid 2019</h1>
       </header>
 
-      <main>
+      <main className="app-main">
         <Row>
           <Col>
             <p>
