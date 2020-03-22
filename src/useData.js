@@ -23,6 +23,7 @@ const meltData = (data, name) => {
     Object.keys(row)
       .filter(col => !ID_COLS.includes(col))
       .forEach(col => {
+        if (row[col] === "") return;
         let newRow = {};
         ID_COLS.forEach(d => newRow[d] = row[d]);
         newRow['date'] = col;

@@ -5,16 +5,14 @@ import { useSpring, animated } from 'react-spring';
 import './Marks.css';
 
 const Dot = ({ x, y, fill, transition }) => {
-  const ref = useRef();
-
   const style = useSpring({
     config: { duration: transition, easing: easeCubic },
     cx: x,
     cy: y,
-    fill: fill
+    fill: fill ? fill : '#efefef',
   });
 
-  return <animated.circle {...style} ref={ref} />;
+  return <animated.circle {...style} />;
 };
 
 export const Marks = ({

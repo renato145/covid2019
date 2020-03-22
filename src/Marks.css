@@ -1,17 +1,17 @@
 .marks {
   fill: none;
-  stroke-width: 3px;
+  stroke-width: 8;
   stroke-linejoin: round;
-  stroke-opacity: 0.75;
+  stroke-opacity: 0.5;
 }
 
 .marks circle {
   opacity: 0.5;
-  r: 5;
-  transition: r 0.2s ease-out;
-  /* fill: grey; */
+  r: 4px;
+  transition: all 0.2s ease-out;
 }
 
 .marks circle:hover {
-  r: 15;
+  r: 14px;
+  opacity: 1;
 }

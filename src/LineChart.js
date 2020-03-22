@@ -1,11 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import {
-  scaleTime,
-  extent,
-  max,
-  scaleLog,
-  schemeTableau10,
-} from 'd3';
+import React, { useMemo, useState, useEffect } from 'react';
+import { scaleTime, extent, max, scaleLog, schemeTableau10 } from 'd3';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
@@ -39,6 +33,7 @@ export const LineChart = ({
   } = dms;
 
   const [selection, setSelection] = useState(defaultLocations);
+  const [colors, setColors] = useState({});
 
   const selectedData = useMemo(() => {
     if (data) return selection.map(d => data[`$${d}`]);
@@ -62,14 +57,55 @@ export const LineChart = ({
       .nice();
   }, [selectedData, yValues, boundedHeight]);
 
+  useEffect(() => {
+    if (!data) return;
+    setColors(current => {
+      const currentKeys = Object.keys(current);
+      if (currentKeys.length === 0) {
+        let newColors = {};
+        selection.forEach((d, i) => (newColors[d] = i));
+        return newColors;
+      }
+      const currentColors = Object.values(current);
+      let newColors = Object.assign({}, current);
+      // Adding locations
+      selection
+        .filter(d => !currentKeys.includes(d))
+        .forEach(d => {
+          let idx = 0;
+          while (currentColors.includes(idx)) {
+            idx++;
+          }
+          newColors[d] = idx;
+        });
+      // Removing a location
+      currentKeys
+        .filter(d => !selection.includes(d))
+        .forEach(d => {
+          delete newColors[d];
+        });
+      return newColors;
+    });
+  }, [data, selection]);
+
   return (
     <div className="chart">
       <Row className="chart-selector justify-content-center">
         <Col md={11}>
           <SelectLocation
-            locations={data ? data.keys() : [selection]}
-            defaultLocation={defaultLocations}
+            locations={data ? data.keys() : defaultLocations}
+            values={selection}
+            colors={colors}
+            colorScheme={schemeTableau10}
             onChange={(e, d) => setSelection(d)}
+            onDelete={(e, d) =>
+              setSelection(current => {
+                const idx = current.indexOf(d);
+                const newSelection = current.slice();
+                newSelection.splice(idx, 1);
+                return newSelection;
+              })
+            }
           />
         </Col>
         <Col md={1}>
@@ -109,18 +145,24 @@ export const LineChart = ({
                   boundedWidth={boundedWidth}
                   {...yAxis}
                 />
-                {selectedData.map((d, i) => (
-                  <Marks
-                    key={i}
-                    data={d}
-                    xScale={xScale}
-                    yScale={yScale}
-                    xValue={xValues}
-                    yValue={yValues}
-                    transition={transitions.lines}
-                    color={schemeTableau10[i % schemeTableau10.length]}
-                  />
-                ))}
+                {selectedData.map((d, i) => {
+                  const location = d[0]['Country/Region'];
+                  const key = colors[location]
+                  const color = schemeTableau10[key % schemeTableau10.length];
+
+                  return (
+                    <Marks
+                      key={key}
+                      data={d}
+                      xScale={xScale}
+                      yScale={yScale}
+                      xValue={xValues}
+                      yValue={yValues}
+                      transition={transitions.lines}
+                      color={color}
+                    />
+                  );
+                })}
               </>
             ) : (
               <text>Loading...</text>
