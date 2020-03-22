@@ -5,6 +5,7 @@ import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
 import { useChartDimensions } from './useChartDimensions';
 import { SelectLocation } from './SelectLocation';
+import { ChartToolTip } from './ChartToolTip';
 import './LineChart.css';
 import { Button, Col, Row } from 'react-bootstrap';
 
@@ -18,6 +19,7 @@ export const LineChart = ({
   yValues,
   transitions,
   defaultLocations,
+  getToolTipText,
   onClose,
 }) => {
   const [ref, dms] = useChartDimensions(dimensions);
@@ -34,6 +36,7 @@ export const LineChart = ({
 
   const [selection, setSelection] = useState(defaultLocations);
   const [colors, setColors] = useState({});
+  const [toolTipData, setToolTipData] = useState();
 
   const selectedData = useMemo(() => {
     if (data) return selection.map(d => data[`$${d}`]);
@@ -119,6 +122,7 @@ export const LineChart = ({
         </Col>
       </Row>
       <div className="chart-container" ref={ref}>
+        <ChartToolTip {...toolTipData} />
         <svg width={width} height={height}>
           <g transform={`translate(${marginLeft},${marginTop})`}>
             {title && (
@@ -147,12 +151,12 @@ export const LineChart = ({
                 />
                 {selectedData.map((d, i) => {
                   const location = d[0]['Country/Region'];
-                  const key = colors[location]
+                  const key = colors[location];
                   const color = schemeTableau10[key % schemeTableau10.length];
 
                   return (
                     <Marks
-                      key={key}
+                      key={key ? key : i}
                       data={d}
                       xScale={xScale}
                       yScale={yScale}
@@ -160,6 +164,8 @@ export const LineChart = ({
                       yValue={yValues}
                       transition={transitions.lines}
                       color={color}
+                      getToolTipText={getToolTipText}
+                      setToolTipData={setToolTipData}
                     />
                   );
                 })}

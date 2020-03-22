@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.css';
-import './App.css';
+import moment from 'moment';
+import { format } from 'd3';
 import { useData } from './useData';
 import { LineChart } from './LineChart';
+import 'bootstrap/dist/css/bootstrap.css';
+import './App.css';
+
+const numberFormat = format(',');
+
+const getToolTipText = d =>
+  `${moment(d['date']).format('Do MMM')}
+  Country: ${d['Country/Region']}
+  Confirmed: ${numberFormat(d['Confirmed'])}
+  Deaths: ${numberFormat(d['Deaths'])}
+  Recovered: ${numberFormat(d['Recovered'])}`;
 
 const chartConfig = {
   // title: {
@@ -20,23 +31,33 @@ const chartConfig = {
   xAxis: {
     tickSize: 6,
     tickOffset: 15,
-    tickWidth: 130
+    tickWidth: 130,
   },
   yAxis: {
     label: 'Cases',
     labelOffset: 50,
     tickSize: 6,
     tickOffset: 10,
-    tickHeight: 100
+    tickHeight: 100,
   },
   xValues: d => d.date,
-  yValues: d => d.Confirmed === 0 ? 0.1 : d.Confirmed,
+  yValues: d => (d.Confirmed === 0 ? 0.1 : d.Confirmed),
   transitions: {
     lines: 500,
   },
   defaultLocations: ['Peru', 'Australia', 'Iran', 'Italy'],
+  getToolTipText,
 };
 
+// Pcrovine/State: ""
+// Country/Region: "Peru"
+// Lat: -9.19
+// Long: -75.0152
+// date: Fri Mar 20 2020 00:00:00 GMT+1030 (Australian Central Daylight Time) {}
+// Confirmed: 234
+// Deaths: 3
+// Recovered: 1
+// __proto__: Object
 function App() {
   const data = useData();
   const [charts, setCharts] = useState([0]);
@@ -52,7 +73,10 @@ function App() {
           <Col>
             <p>
               Plots of coronavirus data (
-              <a href='https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data' target="_black">
+              <a
+                href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data"
+                target="_black"
+              >
                 source
               </a>
               ).

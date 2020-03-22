@@ -4,15 +4,29 @@ import { interpolatePath } from 'd3-interpolate-path';
 import { useSpring, animated } from 'react-spring';
 import './Marks.css';
 
-const Dot = ({ x, y, fill, transition }) => {
-  const style = useSpring({
+const Dot = ({ x, y, fill, transition, onPointerEnter, onPointerLeave }) => {
+  const [style, setStyle] = useSpring(() => ({
     config: { duration: transition, easing: easeCubic },
     cx: x,
     cy: y,
     fill: fill ? fill : '#efefef',
-  });
+  }));
 
-  return <animated.circle {...style} />;
+  useEffect(() => {
+    setStyle({
+      cx: x,
+      cy: y,
+      fill: fill ? fill : '#efefef',
+    });
+  }, [setStyle, x, y, fill]);
+
+  return (
+    <animated.circle
+      {...style}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
+    />
+  );
 };
 
 export const Marks = ({
@@ -23,6 +37,8 @@ export const Marks = ({
   yValue,
   transition,
   color,
+  getToolTipText,
+  setToolTipData,
 }) => {
   const path = useRef(null);
 
@@ -42,15 +58,23 @@ export const Marks = ({
   return (
     <g className="marks">
       <path ref={path} stroke={color} />
-      {data.map((d, i) => (
-        <Dot
-          key={i}
-          x={xScale(xValue(d))}
-          y={yScale(yValue(d))}
-          fill={color}
-          transition={transition}
-        />
-      ))}
+      {data.map((d, i) => {
+        const x = xScale(xValue(d));
+        const y = yScale(yValue(d));
+        return (
+          <Dot
+            key={i}
+            x={x}
+            y={y}
+            fill={color}
+            transition={transition}
+            onPointerEnter={e =>
+              setToolTipData({ text: getToolTipText(d), x, y, color })
+            }
+            onPointerLeave={() => setToolTipData('')}
+          />
+        );
+      })}
     </g>
   );
 };

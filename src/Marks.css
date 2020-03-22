@@ -1,13 +1,13 @@
 .marks {
   fill: none;
-  stroke-width: 8;
+  stroke-width: 10;
   stroke-linejoin: round;
   stroke-opacity: 0.5;
 }
 
 .marks circle {
   opacity: 0.5;
-  r: 4px;
+  r: 5px;
   transition: all 0.2s ease-out;
 }
 

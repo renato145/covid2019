@@ -22,6 +22,6 @@ text {
 }
 
 .close-button {
-  padding: 0rem 0.4rem;
-  border: 0px;
+  padding: 0rem 0.4rem !important;
+  border: 0px !important;
 }

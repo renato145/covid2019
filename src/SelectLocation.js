@@ -38,7 +38,7 @@ export const SelectLocation = ({
           <LocationTag
             key={i}
             tag={d}
-            color={colorScheme[colors[d]]}
+            color={colorScheme[colors[d] % colorScheme.length]}
             onDelete={onDelete}
           />
         ))
