@@ -3,6 +3,7 @@
   stroke-width: 10;
   stroke-linejoin: round;
   stroke-opacity: 0.5;
+  stroke-linecap: round;
 }
 
 .marks circle {
