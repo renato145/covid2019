@@ -23,9 +23,9 @@ const meltData = (data, name) => {
     Object.keys(row)
       .filter(col => !ID_COLS.includes(col))
       .forEach(col => {
-        if (row[col] === "") return;
+        if (row[col] === '') return;
         let newRow = {};
-        ID_COLS.forEach(d => newRow[d] = row[d]);
+        ID_COLS.forEach(d => (newRow[d] = row[d]));
         newRow['date'] = col;
         newRow[name] = +row[col];
         newData.push(newRow);
@@ -48,27 +48,27 @@ export const useData = () => {
       const locations = data[0].keys();
       let combinedData = [];
       locations.forEach(loc => {
-        const allData = data.map(d => d[`$${loc}`])
+        const allData = data.map(d => d[`$${loc}`]);
         const dates = allData[0].keys();
         dates.forEach(dd => {
-          const values = allData.map(d => d[`$${dd}`][0])
+          const values = allData.map(d => d[`$${dd}`]);
           let newData = {};
           ID_COLS.forEach(d => {
-            const val = values[0][d];
+            const val = values[0][0][d];
             newData[d] = ['Lat', 'Long'].includes(d) ? +val : val;
           });
           newData['date'] = new Date(dd);
-          values.forEach((d,i) => {
+          values.forEach((groupValues, i) => {
             const name = URLS[i][0];
-            newData[name] = d[name];
-          })
+            newData[name] = groupValues.map(val => val[name]).reduce((acc,val) => val+acc);
+          });
           combinedData.push(newData);
         });
       });
       const formatedData = nest()
-          .key(d => d['Country/Region'])
-          .sortValues((a, b) => a.date - b.date)
-          .map(combinedData)
+        .key(d => d['Country/Region'])
+        .sortValues((a, b) => a.date - b.date)
+        .map(combinedData);
       setData(formatedData);
     });
   }, []);
