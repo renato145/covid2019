@@ -1,17 +1,39 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import moment from 'moment';
+import { format } from 'd3';
 import './ChartToolTip.css';
 
-export const ChartToolTip = ({ text, x, y, color }) => {
+const numberFormat = format(',');
+
+export const ChartToolTip = ({ data, x, y, color }) => {
+  const text = useMemo(() => {
+    if (!data) return;
+    return {
+      date: moment(data['date']).format('Do MMM'),
+      country: data['Country/Region'],
+      confirmed: numberFormat(data['Confirmed']),
+      deaths: numberFormat(data['Deaths']),
+    };
+  }, [data]);
+
   return (
     <div
       className="wrapper"
       style={{
-        transform: `translate(${x}px,${y + 30}px)`,
+        transform: `translate(calc(-50% + ${x}px),${y + 30}px)`,
         backgroundColor: color,
-        opacity: text ? 0.75 : 0,
+        opacity: text ? 0.85 : 0,
       }}
     >
-      <div className="chart-tooltip">{text}</div>
+      <div className="chart-tooltip">
+        { data && (
+          <>
+            <b>{text.country} - {text.date}</b><br/>
+            <span>Confirmed: {text.confirmed}</span><br/>
+            <span>Deaths: {text.deaths}</span>
+          </>
+        )}
+      </div>
     </div>
   );
 };

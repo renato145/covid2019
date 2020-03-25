@@ -36,7 +36,7 @@ export const SelectLocation = ({
       renderTags={tag =>
         tag.map((d, i) => (
           <LocationTag
-            key={i}
+            key={d}
             tag={d}
             color={colorScheme[colors[d] % colorScheme.length]}
             onDelete={onDelete}

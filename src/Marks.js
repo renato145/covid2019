@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { select, line, easeCubic } from 'd3';
 import { interpolatePath } from 'd3-interpolate-path';
 import { useSpring, animated } from 'react-spring';
@@ -37,7 +37,6 @@ export const Marks = ({
   yValue,
   transition,
   color,
-  getToolTipText,
   setToolTipData,
 }) => {
   const path = useRef(null);
@@ -68,10 +67,8 @@ export const Marks = ({
             y={y}
             fill={color}
             transition={transition}
-            onPointerEnter={() =>
-              setToolTipData({ text: getToolTipText(d), x, y, color })
-            }
-            onPointerLeave={() => setToolTipData('')}
+            onPointerEnter={() => setToolTipData({ data: d, x, y, color })}
+            onPointerLeave={() => setToolTipData("")}
           />
         );
       })}

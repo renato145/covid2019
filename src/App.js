@@ -1,20 +1,9 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
-import moment from 'moment';
-import { format } from 'd3';
 import { useData } from './useData';
 import { LineChart } from './LineChart';
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
-
-const numberFormat = format(',');
-
-const getToolTipText = d =>
-  `${moment(d['date']).format('Do MMM')}
-  Country: ${d['Country/Region']}
-  Confirmed: ${numberFormat(d['Confirmed'])}
-  Deaths: ${numberFormat(d['Deaths'])}
-  Recovered: ${numberFormat(d['Recovered'])}`;
 
 const chartConfig = {
   // title: {
@@ -46,7 +35,6 @@ const chartConfig = {
     lines: 500,
   },
   defaultLocations: ['Peru', 'Australia', 'Iran', 'Italy'],
-  getToolTipText,
 };
 
 // Pcrovine/State: ""

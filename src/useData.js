@@ -4,16 +4,16 @@ import { useState, useEffect } from 'react';
 const URLS = [
   [
     'Confirmed',
-    'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv',
+    'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv',
   ],
   [
     'Deaths',
-    'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv',
+    'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv',
   ],
-  [
-    'Recovered',
-    'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv',
-  ],
+  // [
+  //   'Recovered',
+  //   'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv',
+  // ],
 ];
 const ID_COLS = ['Province/State', 'Country/Region', 'Lat', 'Long'];
 
@@ -48,9 +48,10 @@ export const useData = () => {
       const locations = data[0].keys();
       let combinedData = [];
       locations.forEach(loc => {
-        const allData = data.map(d => d[`$${loc}`]);
+        const allData = data.map(d => d[`$${loc}`]).filter(d => d);
         const dates = allData[0].keys();
         dates.forEach(dd => {
+          // console.log(allData);
           const values = allData.map(d => d[`$${dd}`]);
           let newData = {};
           ID_COLS.forEach(d => {
@@ -59,6 +60,7 @@ export const useData = () => {
           });
           newData['date'] = new Date(dd);
           values.forEach((groupValues, i) => {
+            if (!groupValues) return;
             const name = URLS[i][0];
             newData[name] = groupValues.map(val => val[name]).reduce((acc,val) => val+acc);
           });

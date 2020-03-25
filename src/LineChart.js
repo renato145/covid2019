@@ -19,7 +19,6 @@ export const LineChart = ({
   yValues,
   transitions,
   defaultLocations,
-  getToolTipText,
   onClose,
 }) => {
   const [ref, dms] = useChartDimensions(dimensions);
@@ -47,8 +46,7 @@ export const LineChart = ({
     const domain = extent(selectedData.map(d => d.map(xValues)).flat());
     return scaleTime()
       .domain(domain)
-      .range([0, boundedWidth])
-      .nice();
+      .range([0, boundedWidth]);
   }, [selectedData, xValues, boundedWidth]);
 
   const yScale = useMemo(() => {
@@ -110,7 +108,6 @@ export const LineChart = ({
                 yValue={yValues}
                 transition={transitions.lines}
                 color={color}
-                getToolTipText={getToolTipText}
                 setToolTipData={setToolTipData}
               />
             );
@@ -119,7 +116,6 @@ export const LineChart = ({
       );
   }, [
     colors,
-    getToolTipText,
     selectedData,
     transitions.lines,
     xScale,
