@@ -5,7 +5,15 @@ import './ChartToolTip.css';
 
 const numberFormat = format(',');
 
-export const ChartToolTip = ({ data, x, y, color }) => {
+// Pcrovine/State: ""
+// Country/Region: "Peru"
+// Lat: -9.19
+// Long: -75.0152
+// date: Fri Mar 20 2020 00:00:00 GMT+1030 (Australian Central Daylight Time) {}
+// Confirmed: 234
+// Deaths: 3
+
+export const ChartToolTip = ({ data, x, y, color, up }) => {
   const text = useMemo(() => {
     if (!data) return;
     return {
@@ -20,7 +28,7 @@ export const ChartToolTip = ({ data, x, y, color }) => {
     <div
       className="wrapper"
       style={{
-        transform: `translate(calc(-50% + ${x}px),${y + 30}px)`,
+        transform: `translate(${x}px,${up ? `calc(${y-10}px - 100%)` : `${y+30}px`})`,
         backgroundColor: color,
         opacity: text ? 0.85 : 0,
       }}

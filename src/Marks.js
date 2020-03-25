@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { select, line, easeCubic } from 'd3';
 import { interpolatePath } from 'd3-interpolate-path';
 import { useSpring, animated } from 'react-spring';
+import { clamp } from './utils';
 import './Marks.css';
 
 const Dot = ({ x, y, fill, transition, onPointerEnter, onPointerLeave }) => {
@@ -38,6 +39,10 @@ export const Marks = ({
   transition,
   color,
   setToolTipData,
+  marginRight,
+  marginLeft,
+  boundedWidth,
+  boundedHeight,
 }) => {
   const path = useRef(null);
 
@@ -67,8 +72,16 @@ export const Marks = ({
             y={y}
             fill={color}
             transition={transition}
-            onPointerEnter={() => setToolTipData({ data: d, x, y, color })}
-            onPointerLeave={() => setToolTipData("")}
+            onPointerEnter={() =>
+              setToolTipData({
+                data: d,
+                x: clamp(x, marginLeft, boundedWidth - marginRight),
+                y,
+                up: y > boundedHeight / 2,
+                color,
+              })
+            }
+            onPointerLeave={() => setToolTipData('')}
           />
         );
       })}

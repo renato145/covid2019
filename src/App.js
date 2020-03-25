@@ -37,15 +37,6 @@ const chartConfig = {
   defaultLocations: ['Peru', 'Australia', 'Iran', 'Italy'],
 };
 
-// Pcrovine/State: ""
-// Country/Region: "Peru"
-// Lat: -9.19
-// Long: -75.0152
-// date: Fri Mar 20 2020 00:00:00 GMT+1030 (Australian Central Daylight Time) {}
-// Confirmed: 234
-// Deaths: 3
-// Recovered: 1
-// __proto__: Object
 function App() {
   const data = useData();
   const [charts, setCharts] = useState([0]);

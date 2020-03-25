@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { scaleTime, extent, max, scaleLog, schemeTableau10 } from 'd3';
+import { scaleTime, extent, max, scaleLog, schemeTableau10, zip } from 'd3';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
@@ -8,6 +8,19 @@ import { SelectLocation } from './SelectLocation';
 import { ChartToolTip } from './ChartToolTip';
 import './LineChart.css';
 import { Button, Col, Row } from 'react-bootstrap';
+
+const getEmptyDates = data => {
+  const values = data.map(d => d.map(o => o['Confirmed']));
+  let i = 0;
+  zip(...values).some(d => {
+    const valSum = d.reduce((acc, o) => o + acc);
+    if (valSum === 0) {
+      i += 1;
+      return false;
+    } else return true;
+  });
+  return i;
+};
 
 export const LineChart = ({
   title,
@@ -38,7 +51,12 @@ export const LineChart = ({
   const [toolTipData, setToolTipData] = useState();
 
   const selectedData = useMemo(() => {
-    if (data) return selection.map(d => data[`$${d}`]);
+    // if (data) return selection.map(d => data[`$${d}`]);
+    if (data) {
+      const out = selection.map(d => data[`$${d}`]);
+      const nSkip = getEmptyDates(out);
+      return out.map(d => d.filter((o, i) => i >= nSkip));
+    }
   }, [data, selection]);
 
   const xScale = useMemo(() => {
@@ -109,13 +127,21 @@ export const LineChart = ({
                 transition={transitions.lines}
                 color={color}
                 setToolTipData={setToolTipData}
+                marginRight={marginRight}
+                marginLeft={marginLeft}
+                boundedWidth={boundedWidth}
+                boundedHeight={boundedHeight}
               />
             );
           })}
         </>
       );
   }, [
+    boundedWidth,
+    boundedHeight,
     colors,
+    marginLeft,
+    marginRight,
     selectedData,
     transitions.lines,
     xScale,
