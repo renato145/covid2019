@@ -20,7 +20,8 @@ const chartConfig = {
   xAxis: {
     tickSize: 6,
     tickOffset: 15,
-    tickWidth: 130,
+    tickWidth: 45,
+    tickWidthDate: 130,
   },
   yAxis: {
     label: 'Cases',
@@ -29,7 +30,6 @@ const chartConfig = {
     tickOffset: 10,
     tickHeight: 100,
   },
-  xValues: d => d.date,
   transitions: {
     lines: 500,
   },

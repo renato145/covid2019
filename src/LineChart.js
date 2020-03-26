@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { scaleTime, extent, max, scaleLog, schemeTableau10 } from 'd3';
+import { scaleTime, extent, max, scaleLinear, scaleLog, schemeTableau10 } from 'd3';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
@@ -16,7 +16,6 @@ export const LineChart = ({
   dimensions,
   xAxis,
   yAxis,
-  xValues,
   transitions,
   defaultLocations,
   onClose,
@@ -36,27 +35,38 @@ export const LineChart = ({
   const [selection, setSelection] = useState(defaultLocations);
   const [colors, setColors] = useState({});
   const [toolTipData, setToolTipData] = useState();
-  const [switchValue, setSwitchValue] = useState(false);
+  const [switchXValue, setSwitchXValue] = useState(false);
+  const [switchXAxis, setSwitchXAxis] = useState(false);
+
+  const xValues = useCallback(
+    d => (switchXAxis ? d['i'] : d['date']),
+    [switchXAxis]
+  );
 
   const yValues = useCallback(
-    d => (switchValue ? d['Deaths'] : d['Confirmed']),
-    [switchValue]
+    d => (switchXValue ? d['Deaths'] : d['Confirmed']),
+    [switchXValue]
   );
 
   const selectedData = useMemo(() => {
     if (data)
       return selection
         .map(d => data[`$${d}`])
-        .map(d => d.filter(o => yValues(o) >= 1));
+        .map(d => {
+          const out = d.filter(o => yValues(o) >= 1);
+          out.forEach((o, i) => (o['i'] = i));
+          return out;
+        });
   }, [data, selection, yValues]);
 
   const xScale = useMemo(() => {
     if (!selectedData) return;
     const domain = extent(selectedData.map(d => d.map(xValues)).flat());
-    return scaleTime()
+    const scale = switchXAxis ? scaleLinear : scaleTime;
+    return scale()
       .domain(domain)
       .range([0, boundedWidth]);
-  }, [selectedData, xValues, boundedWidth]);
+  }, [selectedData, xValues, boundedWidth, switchXAxis]);
 
   const yScale = useMemo(() => {
     if (!selectedData) return;
@@ -171,33 +181,33 @@ export const LineChart = ({
           </Button>
         </Col>
       </Row>
-      <Row className="justify-content-between" >
+      <Row className="justify-content-between">
         <Col className="chart-options" sm={12} md={4}>
           <label className="chart-option-label">Show value:</label>
           <ToogleSwitch
-            value={switchValue}
+            value={switchXValue}
             preLabel="Confirmed"
             label="Deaths"
             width={2.75}
             height={1.3}
             activeColor="#7a9abe"
             inactiveColor="#7a9abe"
-            onChange={() => setSwitchValue(d => !d)}
+            onChange={() => setSwitchXValue(d => !d)}
           />
         </Col>
-        {/* <Col className="chart-options" sm={12} md={4}>
+        <Col className="chart-options" sm={12} md={4}>
           <label className="chart-option-label">x Axis:</label>
           <ToogleSwitch
-            value={switchValue}
+            value={switchXAxis}
             preLabel="Date"
             label="Days since"
             width={2.75}
             height={1.3}
             activeColor="#7a9abe"
             inactiveColor="#7a9abe"
-            // onChange={() => setSwitchValue(d => !d)}
+            onChange={() => setSwitchXAxis(d => !d)}
           />
-        </Col> */}
+        </Col>
       </Row>
       <Row className="chart-container" ref={ref}>
         <Col>
@@ -220,6 +230,7 @@ export const LineChart = ({
                     xScale={xScale}
                     boundedHeight={boundedHeight}
                     boundedWidth={boundedWidth}
+                    date={!switchXAxis}
                     {...xAxis}
                   />
                   <AxisLeft

@@ -6,16 +6,20 @@ export const AxisBottom = ({
   xScale,
   boundedHeight,
   boundedWidth,
+  date,
   label,
   labelOffset,
   tickSize,
   tickOffset,
   tickWidth,
+  tickWidthDate
 }) => {
   const range = useMemo(() => xScale.range(), [xScale]);
-  const tickCount = useMemo(() => boundedWidth / tickWidth, [
+  const tickCount = useMemo(() => boundedWidth / (date ? tickWidthDate : tickWidth), [
     boundedWidth,
     tickWidth,
+    tickWidthDate,
+    date
   ]);
 
   return (
@@ -40,7 +44,7 @@ export const AxisBottom = ({
             dy=".71em"
             y={boundedHeight + tickOffset}
           >
-            {moment(tickValue).format('Do MMM')}
+            {date ? moment(tickValue).format('Do MMM') : tickValue}
           </text>
         </g>
       ))}
