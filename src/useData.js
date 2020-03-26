@@ -50,6 +50,8 @@ export const useData = () => {
       locations.forEach(loc => {
         const allData = data.map(d => d[`$${loc}`]).filter(d => d);
         const dates = allData[0].keys();
+        let idxConfirmed = -1;
+        let idxDeaths = -1;
         dates.forEach(dd => {
           const values = allData.map(d => d[`$${dd}`]);
           let newData = {};
@@ -65,7 +67,13 @@ export const useData = () => {
               .reduce((acc, val) => val + acc);
           });
           if (newData['Confirmed'] > 0) {
+            idxConfirmed++;
             newData['date'] = new Date(dd);
+            newData['idxConfirmed'] = idxConfirmed;
+            if (newData['Deaths'] > 0) {
+              idxDeaths++;
+              newData['idxDeaths'] = idxDeaths;
+            }
             combinedData.push(newData);
           }
         });

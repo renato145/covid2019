@@ -1,5 +1,12 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { scaleTime, extent, max, scaleLinear, scaleLog, schemeTableau10 } from 'd3';
+import {
+  scaleTime,
+  extent,
+  max,
+  scaleLinear,
+  scaleLog,
+  schemeTableau10,
+} from 'd3';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
@@ -39,8 +46,13 @@ export const LineChart = ({
   const [switchXAxis, setSwitchXAxis] = useState(false);
 
   const xValues = useCallback(
-    d => (switchXAxis ? d['i'] : d['date']),
-    [switchXAxis]
+    d =>
+      switchXAxis
+        ? switchXValue
+          ? d['idxDeaths']
+          : d['idxConfirmed']
+        : d['date'],
+    [switchXAxis, switchXValue]
   );
 
   const yValues = useCallback(
@@ -52,11 +64,7 @@ export const LineChart = ({
     if (data)
       return selection
         .map(d => data[`$${d}`])
-        .map(d => {
-          const out = d.filter(o => yValues(o) >= 1);
-          out.forEach((o, i) => (o['i'] = i));
-          return out;
-        });
+        .map(d => d.filter(o => yValues(o) >= 1));
   }, [data, selection, yValues]);
 
   const xScale = useMemo(() => {
@@ -113,6 +121,7 @@ export const LineChart = ({
       return (
         <>
           {selectedData.map((d, i) => {
+            if (d.length === 0) return;
             const location = d[0]['Country/Region'];
             const color =
               schemeTableau10[colors[location] % schemeTableau10.length];
@@ -182,7 +191,7 @@ export const LineChart = ({
         </Col>
       </Row>
       <Row className="justify-content-between">
-        <Col className="chart-options" sm={12} md={4}>
+        <Col className="chart-options" sm={12} md={6}>
           <label className="chart-option-label">Show value:</label>
           <ToogleSwitch
             value={switchXValue}
@@ -195,7 +204,7 @@ export const LineChart = ({
             onChange={() => setSwitchXValue(d => !d)}
           />
         </Col>
-        <Col className="chart-options" sm={12} md={4}>
+        <Col className="chart-options" sm={12} md={6}>
           <label className="chart-option-label">x Axis:</label>
           <ToogleSwitch
             value={switchXAxis}
