@@ -1,26 +1,14 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { scaleTime, extent, max, scaleLog, schemeTableau10, zip } from 'd3';
+import { scaleTime, extent, max, scaleLog, schemeTableau10 } from 'd3';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
 import { useChartDimensions } from './useChartDimensions';
 import { SelectLocation } from './SelectLocation';
 import { ChartToolTip } from './ChartToolTip';
-import './LineChart.css';
+import { ToogleSwitch } from './ToogleSwitch';
 import { Button, Col, Row } from 'react-bootstrap';
-
-const getEmptyDates = data => {
-  const values = data.map(d => d.map(o => o['Confirmed']));
-  let i = 0;
-  zip(...values).some(d => {
-    const valSum = d.reduce((acc, o) => o + acc);
-    if (valSum === 0) {
-      i += 1;
-      return false;
-    } else return true;
-  });
-  return i;
-};
+import './LineChart.css';
 
 export const LineChart = ({
   title,
@@ -51,12 +39,7 @@ export const LineChart = ({
   const [toolTipData, setToolTipData] = useState();
 
   const selectedData = useMemo(() => {
-    // if (data) return selection.map(d => data[`$${d}`]);
-    if (data) {
-      const out = selection.map(d => data[`$${d}`]);
-      const nSkip = getEmptyDates(out);
-      return out.map(d => d.filter((o, i) => i >= nSkip));
-    }
+    if (data) return selection.map(d => data[`$${d}`]);
   }, [data, selection]);
 
   const xScale = useMemo(() => {
@@ -153,7 +136,7 @@ export const LineChart = ({
   return (
     <div className="chart">
       <Row className="chart-selector justify-content-center">
-        <Col md={11}>
+        <Col className="select-location">
           <SelectLocation
             locations={data ? data.keys() : defaultLocations}
             values={selection}
@@ -170,7 +153,7 @@ export const LineChart = ({
             }
           />
         </Col>
-        <Col md={1}>
+        <Col className="close-wrapper">
           <Button
             variant="outline-danger close-button"
             size="sm"
@@ -180,42 +163,58 @@ export const LineChart = ({
           </Button>
         </Col>
       </Row>
-      <div className="chart-container" ref={ref}>
-        <ChartToolTip {...toolTipData} />
-        <svg width={width} height={height}>
-          <g transform={`translate(${marginLeft},${marginTop})`}>
-            {title && (
-              <text
-                className="title"
-                x={boundedWidth / 2 + title.dx}
-                y={title.dy}
-                textAnchor="middle"
-              >
-                {title.label}
-              </text>
-            )}
-            {selectedData ? (
-              <>
-                <AxisBottom
-                  xScale={xScale}
-                  boundedHeight={boundedHeight}
-                  boundedWidth={boundedWidth}
-                  {...xAxis}
-                />
-                <AxisLeft
-                  yScale={yScale}
-                  boundedHeight={boundedHeight}
-                  boundedWidth={boundedWidth}
-                  {...yAxis}
-                />
-                {marks}
-              </>
-            ) : (
-              <text>Loading...</text>
-            )}
-          </g>
-        </svg>
-      </div>
+      <Row>
+        <Col className="chart-options">
+          <label className="chart-option-label">Show value:</label>
+          <ToogleSwitch
+            preLabel="Confirmed"
+            label="Deaths"
+            width={2.75}
+            height={1.3}
+            activeColor="#7a9abe"
+            inactiveColor="#7a9abe"
+            onChange={d => console.log(d)}
+          />
+        </Col>
+      </Row>
+      <Row className="chart-container" ref={ref}>
+        <Col>
+          <ChartToolTip {...toolTipData} />
+          <svg width={width} height={height}>
+            <g transform={`translate(${marginLeft},${marginTop})`}>
+              {title && (
+                <text
+                  className="title"
+                  x={boundedWidth / 2 + title.dx}
+                  y={title.dy}
+                  textAnchor="middle"
+                >
+                  {title.label}
+                </text>
+              )}
+              {selectedData ? (
+                <>
+                  <AxisBottom
+                    xScale={xScale}
+                    boundedHeight={boundedHeight}
+                    boundedWidth={boundedWidth}
+                    {...xAxis}
+                  />
+                  <AxisLeft
+                    yScale={yScale}
+                    boundedHeight={boundedHeight}
+                    boundedWidth={boundedWidth}
+                    {...yAxis}
+                  />
+                  {marks}
+                </>
+              ) : (
+                <text>Loading...</text>
+              )}
+            </g>
+          </svg>
+        </Col>
+      </Row>
     </div>
   );
 };

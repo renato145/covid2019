@@ -51,20 +51,23 @@ export const useData = () => {
         const allData = data.map(d => d[`$${loc}`]).filter(d => d);
         const dates = allData[0].keys();
         dates.forEach(dd => {
-          // console.log(allData);
           const values = allData.map(d => d[`$${dd}`]);
           let newData = {};
           ID_COLS.forEach(d => {
             const val = values[0][0][d];
             newData[d] = ['Lat', 'Long'].includes(d) ? +val : val;
           });
-          newData['date'] = new Date(dd);
           values.forEach((groupValues, i) => {
             if (!groupValues) return;
             const name = URLS[i][0];
-            newData[name] = groupValues.map(val => val[name]).reduce((acc,val) => val+acc);
+            newData[name] = groupValues
+              .map(val => val[name])
+              .reduce((acc, val) => val + acc);
           });
-          combinedData.push(newData);
+          if (newData['Confirmed'] > 0) {
+            newData['date'] = new Date(dd);
+            combinedData.push(newData);
+          }
         });
       });
       const formatedData = nest()
