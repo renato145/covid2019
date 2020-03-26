@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { scaleTime, extent, max, scaleLog, schemeTableau10 } from 'd3';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
@@ -17,7 +17,6 @@ export const LineChart = ({
   xAxis,
   yAxis,
   xValues,
-  yValues,
   transitions,
   defaultLocations,
   onClose,
@@ -37,10 +36,19 @@ export const LineChart = ({
   const [selection, setSelection] = useState(defaultLocations);
   const [colors, setColors] = useState({});
   const [toolTipData, setToolTipData] = useState();
+  const [switchValue, setSwitchValue] = useState(false);
+
+  const yValues = useCallback(
+    d => (switchValue ? d['Deaths'] : d['Confirmed']),
+    [switchValue]
+  );
 
   const selectedData = useMemo(() => {
-    if (data) return selection.map(d => data[`$${d}`]);
-  }, [data, selection]);
+    if (data)
+      return selection
+        .map(d => data[`$${d}`])
+        .map(d => d.filter(o => yValues(o) >= 1));
+  }, [data, selection, yValues]);
 
   const xScale = useMemo(() => {
     if (!selectedData) return;
@@ -167,13 +175,14 @@ export const LineChart = ({
         <Col className="chart-options">
           <label className="chart-option-label">Show value:</label>
           <ToogleSwitch
+            value={switchValue}
             preLabel="Confirmed"
             label="Deaths"
             width={2.75}
             height={1.3}
             activeColor="#7a9abe"
             inactiveColor="#7a9abe"
-            onChange={d => console.log(d)}
+            onChange={() => setSwitchValue(d => !d)}
           />
         </Col>
       </Row>

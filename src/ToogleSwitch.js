@@ -66,6 +66,7 @@ const Slider = styled.span`
 `;
 
 export const ToogleSwitch = ({
+  value,
   preLabel,
   label,
   width = 3.5,
@@ -73,21 +74,15 @@ export const ToogleSwitch = ({
   ballMargin = 0.2,
   activeColor = '#007bff',
   inactiveColor = '#ccc',
-  active = false,
   onChange = () => {},
 }) => {
-  const [isActive, setIsActive] = useState(active);
   const ballSize = height - ballMargin * 2;
-  const handleChange = () =>
-    setIsActive(d => {
-      onChange(!d);
-      return !d;
-    });
+
   return (
     <div>
-      {preLabel && <TextLabel left active={!isActive}>{preLabel}</TextLabel>}
+      {preLabel && <TextLabel left active={!value}>{preLabel}</TextLabel>}
       <SwitchLabel width={width} height={height}>
-        <input type="checkbox" checked={isActive} onChange={handleChange} />
+        <input type="checkbox" checked={value} onChange={onChange} />
         <Slider
           ballSize={ballSize}
           move={width - ballSize - ballMargin * 2}
@@ -96,7 +91,7 @@ export const ToogleSwitch = ({
           inactiveColor={inactiveColor}
         />
       </SwitchLabel>
-      {label && <TextLabel right active={isActive}>{label}</TextLabel>}
+      {label && <TextLabel right active={value}>{label}</TextLabel>}
     </div>
   );
 };

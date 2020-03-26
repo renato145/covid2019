@@ -75,7 +75,7 @@ export const Marks = ({
             onPointerEnter={() =>
               setToolTipData({
                 data: d,
-                x: clamp(x, marginLeft, boundedWidth - marginRight),
+                x: clamp(x, marginLeft, boundedWidth - marginRight - 25),
                 y,
                 up: y > boundedHeight / 2,
                 color,

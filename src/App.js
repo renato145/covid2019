@@ -30,7 +30,6 @@ const chartConfig = {
     tickHeight: 100,
   },
   xValues: d => d.date,
-  yValues: d => (d.Confirmed === 0 ? 0.1 : d.Confirmed),
   transitions: {
     lines: 500,
   },
