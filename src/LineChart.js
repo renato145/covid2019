@@ -171,8 +171,8 @@ export const LineChart = ({
           </Button>
         </Col>
       </Row>
-      <Row>
-        <Col className="chart-options">
+      <Row className="justify-content-between" >
+        <Col className="chart-options" sm={12} md={4}>
           <label className="chart-option-label">Show value:</label>
           <ToogleSwitch
             value={switchValue}
@@ -185,6 +185,19 @@ export const LineChart = ({
             onChange={() => setSwitchValue(d => !d)}
           />
         </Col>
+        {/* <Col className="chart-options" sm={12} md={4}>
+          <label className="chart-option-label">x Axis:</label>
+          <ToogleSwitch
+            value={switchValue}
+            preLabel="Date"
+            label="Days since"
+            width={2.75}
+            height={1.3}
+            activeColor="#7a9abe"
+            inactiveColor="#7a9abe"
+            // onChange={() => setSwitchValue(d => !d)}
+          />
+        </Col> */}
       </Row>
       <Row className="chart-container" ref={ref}>
         <Col>
