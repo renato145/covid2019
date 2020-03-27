@@ -1,89 +1,53 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import {
-  scaleTime,
-  extent,
-  max,
-  scaleLinear,
-  scaleLog,
-  schemeTableau10,
-} from 'd3';
-import { AxisBottom } from './AxisBottom';
-import { AxisLeft } from './AxisLeft';
-import { Marks } from './Marks';
-import { useChartDimensions } from './useChartDimensions';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from 'react';
+import { schemeTableau10, format, scaleLog } from 'd3';
+import moment from 'moment';
+import ResponsiveXYFrame from 'semiotic/lib/ResponsiveXYFrame';
+import { Row, Col, Button } from 'react-bootstrap';
 import { SelectLocation } from './SelectLocation';
-import { ChartToolTip } from './ChartToolTip';
 import { ToogleSwitch } from './ToogleSwitch';
-import { Button, Col, Row } from 'react-bootstrap';
 import './LineChart.css';
+import { ResizeObserver } from '@juggle/resize-observer';
 
-export const LineChart = ({
-  title,
-  data,
-  dimensions,
-  xAxis,
-  yAxis,
-  transitions,
-  defaultLocations,
-  onClose,
-}) => {
-  const [ref, dms] = useChartDimensions(dimensions);
-  const {
-    width,
-    height,
-    marginLeft,
-    marginTop,
-    marginBottom,
-    marginRight,
-    boundedHeight,
-    boundedWidth,
-  } = dms;
+const formatNumbers = format('.0s');
 
+export const LineChart = ({ data, onClose, defaultLocations }) => {
+  const ref = useRef();
   const [selection, setSelection] = useState(defaultLocations);
   const [colors, setColors] = useState({});
-  const [toolTipData, setToolTipData] = useState();
-  const [switchXValue, setSwitchXValue] = useState(false);
+  const [switchYValue, setSwitchYValue] = useState(false);
   const [switchXAxis, setSwitchXAxis] = useState(false);
+
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
 
   const xValues = useCallback(
     d =>
       switchXAxis
-        ? switchXValue
+        ? switchYValue
           ? d['idxDeaths']
           : d['idxConfirmed']
         : d['date'],
-    [switchXAxis, switchXValue]
+    [switchXAxis, switchYValue]
   );
 
   const yValues = useCallback(
-    d => (switchXValue ? d['Deaths'] : d['Confirmed']),
-    [switchXValue]
+    d => (switchYValue ? d['Deaths'] : d['Confirmed']),
+    [switchYValue]
   );
 
-  const selectedData = useMemo(() => {
+  const lines = useMemo(() => {
     if (data)
-      return selection
-        .map(d => data[`$${d}`])
-        .map(d => d.filter(o => yValues(o) >= 1));
+      return selection.map(d => ({
+        title: d,
+        coordinates: data[`$${d}`].filter(o => yValues(o) >= 1),
+      }));
   }, [data, selection, yValues]);
-
-  const xScale = useMemo(() => {
-    if (!selectedData) return;
-    const domain = extent(selectedData.map(d => d.map(xValues)).flat());
-    const scale = switchXAxis ? scaleLinear : scaleTime;
-    return scale()
-      .domain(domain)
-      .range([0, boundedWidth]);
-  }, [selectedData, xValues, boundedWidth, switchXAxis]);
-
-  const yScale = useMemo(() => {
-    if (!selectedData) return;
-    const domain = [0.1, max(selectedData.map(d => d.map(yValues)).flat())];
-    return scaleLog()
-      .domain(domain)
-      .range([boundedHeight, 0])
-      .nice();
-  }, [selectedData, yValues, boundedHeight]);
 
   useEffect(() => {
     if (!data) return;
@@ -116,52 +80,19 @@ export const LineChart = ({
     });
   }, [data, selection]);
 
-  const marks = useMemo(() => {
-    if (selectedData)
-      return (
-        <>
-          {selectedData.map((d, i) => {
-            if (d.length === 0) return;
-            const location = d[0]['Country/Region'];
-            const color =
-              schemeTableau10[colors[location] % schemeTableau10.length];
-
-            return (
-              <Marks
-                key={location}
-                data={d}
-                xScale={xScale}
-                yScale={yScale}
-                xValue={xValues}
-                yValue={yValues}
-                transition={transitions.lines}
-                color={color}
-                setToolTipData={setToolTipData}
-                marginRight={marginRight}
-                marginLeft={marginLeft}
-                boundedWidth={boundedWidth}
-                boundedHeight={boundedHeight}
-              />
-            );
-          })}
-        </>
-      );
-  }, [
-    boundedWidth,
-    boundedHeight,
-    colors,
-    marginLeft,
-    marginRight,
-    selectedData,
-    transitions.lines,
-    xScale,
-    xValues,
-    yScale,
-    yValues,
-  ]);
+  useEffect(() => {
+    const element = ref.current.node;
+    const resizeObserver = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      setWidth(width);
+      setHeight(height);
+    });
+    resizeObserver.observe(element);
+    return () => resizeObserver.unobserve(element);
+  }, []);
 
   return (
-    <div className="chart">
+    <div>
       <Row className="chart-selector justify-content-center">
         <Col className="select-location">
           <SelectLocation
@@ -194,14 +125,14 @@ export const LineChart = ({
         <Col className="chart-options" sm={12} md={6}>
           <label className="chart-option-label">Show value:</label>
           <ToogleSwitch
-            value={switchXValue}
+            value={switchYValue}
             preLabel="Confirmed"
             label="Deaths"
             width={2.75}
             height={1.3}
             activeColor="#7a9abe"
             inactiveColor="#7a9abe"
-            onChange={() => setSwitchXValue(d => !d)}
+            onChange={() => setSwitchYValue(d => !d)}
           />
         </Col>
         <Col className="chart-options" sm={12} md={6}>
@@ -218,45 +149,30 @@ export const LineChart = ({
           />
         </Col>
       </Row>
-      <Row className="chart-container" ref={ref}>
-        <Col>
-          <ChartToolTip {...toolTipData} />
-          <svg width={width} height={height}>
-            <g transform={`translate(${marginLeft},${marginTop})`}>
-              {title && (
-                <text
-                  className="title"
-                  x={boundedWidth / 2 + title.dx}
-                  y={title.dy}
-                  textAnchor="middle"
-                >
-                  {title.label}
-                </text>
-              )}
-              {selectedData ? (
-                <>
-                  <AxisBottom
-                    xScale={xScale}
-                    boundedHeight={boundedHeight}
-                    boundedWidth={boundedWidth}
-                    date={!switchXAxis}
-                    {...xAxis}
-                  />
-                  <AxisLeft
-                    yScale={yScale}
-                    boundedHeight={boundedHeight}
-                    boundedWidth={boundedWidth}
-                    {...yAxis}
-                  />
-                  {marks}
-                </>
-              ) : (
-                <text>Loading...</text>
-              )}
-            </g>
-          </svg>
-        </Col>
-      </Row>
+      <div className="chart-container">
+        <ResponsiveXYFrame
+          ref={ref}
+          lines={lines}
+          xAccessor={xValues}
+          yAccessor={yValues}
+          yScaleType={scaleLog}
+          lineStyle={d => ({
+            stroke: schemeTableau10[colors[d.title] % schemeTableau10.length],
+          })}
+          axes={[
+            { orient: 'left', tickFormat: formatNumbers, ticks: 3 },
+            {
+              orient: 'bottom',
+              tickFormat: d => (switchXAxis ? d : moment(d).format('Do MMM')),
+              ticks: width / 130,
+            },
+          ]}
+          margin={{ left: 50, bottom: 30, right: 10, top: 20 }}
+          hoverAnnotation
+          responsiveWidth
+          responsiveHeight
+        />
+      </div>
     </div>
   );
 };

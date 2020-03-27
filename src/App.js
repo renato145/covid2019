@@ -40,6 +40,20 @@ function App() {
   const data = useData();
   const [charts, setCharts] = useState([0]);
 
+  const handleClose = i =>
+    setCharts(d => {
+      const idx = d.indexOf(i);
+      const out = d.slice();
+      out.splice(idx, 1);
+      return out;
+    });
+
+  const handleNewGraph = () =>
+    setCharts(d => {
+      const idx = d.length === 0 ? 0 : d[d.length - 1] + 1;
+      return d.concat(idx);
+    });
+
   return (
     <Container className="app-container">
       <header>
@@ -67,14 +81,7 @@ function App() {
             <Col key={i} md={12} xl={charts.length > 1 ? 6 : 12}>
               <LineChart
                 data={data}
-                onClose={() =>
-                  setCharts(d => {
-                    const idx = d.indexOf(i);
-                    const out = d.slice();
-                    out.splice(idx, 1);
-                    return out;
-                  })
-                }
+                onClose={() => handleClose(i)}
                 {...chartConfig}
               />
             </Col>
@@ -82,16 +89,7 @@ function App() {
         </Row>
         <Row className="mt-2">
           <Col className="text-right">
-            <Button
-              onClick={() =>
-                setCharts(d => {
-                  const idx = d.length === 0 ? 0 : d[d.length - 1] + 1;
-                  return d.concat(idx);
-                })
-              }
-            >
-              Add Chart
-            </Button>
+            <Button onClick={handleNewGraph}>Add Chart</Button>
           </Col>
         </Row>
       </main>
