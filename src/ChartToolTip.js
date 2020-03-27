@@ -21,6 +21,7 @@ export const ChartToolTip = ({ data, x, y, color, up }) => {
       country: data['Country/Region'],
       confirmed: numberFormat(data['Confirmed']),
       deaths: numberFormat(data['Deaths']),
+      recovered: numberFormat(data['Recovered'])
     };
   }, [data]);
 
@@ -38,7 +39,8 @@ export const ChartToolTip = ({ data, x, y, color, up }) => {
           <>
             <b>{text.country} - {text.date}</b><br/>
             <span>Confirmed: {text.confirmed}</span><br/>
-            <span>Deaths: {text.deaths}</span>
+            <span>Deaths: {text.deaths}</span><br/>
+            <span>Recovered: {text.recovered}</span>
           </>
         )}
       </div>

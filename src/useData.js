@@ -10,10 +10,10 @@ const URLS = [
     'Deaths',
     'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv',
   ],
-  // [
-  //   'Recovered',
-  //   'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv',
-  // ],
+  [
+    'Recovered',
+    'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv',
+  ],
 ];
 const ID_COLS = ['Province/State', 'Country/Region', 'Lat', 'Long'];
 
@@ -34,6 +34,12 @@ const meltData = (data, name) => {
   return newData;
 };
 
+const customAnnotations = {
+  Peru: {
+    '3/16/20': 'Quarantine starts'
+  }
+};
+
 export const useData = () => {
   const [data, setData] = useState(null);
 
@@ -52,12 +58,17 @@ export const useData = () => {
         const dates = allData[0].keys();
         let idxConfirmed = -1;
         let idxDeaths = -1;
+        const locAnn = customAnnotations[loc];
         dates.forEach(dd => {
           const values = allData.map(d => d[`$${dd}`]);
           let newData = {};
           ID_COLS.forEach(d => {
             const val = values[0][0][d];
             newData[d] = ['Lat', 'Long'].includes(d) ? +val : val;
+            if (locAnn) {
+              const dateAnn = locAnn[dd];
+              if (dateAnn) newData['annotation'] = dateAnn;
+            }
           });
           values.forEach((groupValues, i) => {
             if (!groupValues) return;
