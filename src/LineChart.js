@@ -15,6 +15,7 @@ import './LineChart.css';
 import { ResizeObserver } from '@juggle/resize-observer';
 
 const formatNumbers = format('.0s');
+const formatNumbersTooltip = format(',');
 
 export const LineChart = ({ data, onClose, defaultLocations }) => {
   const ref = useRef();
@@ -48,6 +49,35 @@ export const LineChart = ({ data, onClose, defaultLocations }) => {
         coordinates: data[`$${d}`].filter(o => yValues(o) >= 1),
       }));
   }, [data, selection, yValues]);
+
+  const annotations = useMemo(() => {
+    if (!lines) return;
+    let annotations = [];
+    lines.forEach(d =>
+      d['coordinates']
+        .filter(o => o['annotation'])
+        .forEach(o => {
+          annotations.push({
+            type: 'enclose',
+            coordinates: [o],
+            className: 'custom-annotation',
+            note: {
+              // title: o['Country/Region'],
+              label: o['annotation'],
+              orientation: 'leftRight',
+              align: 'middle',
+              lineType: null,
+              wrap: 100,
+            },
+            dx: 30,
+            dy: 10,
+            connector: { end: 'none' },
+          });
+        })
+    );
+
+    return annotations;
+  }, [lines]);
 
   useEffect(() => {
     if (!data) return;
@@ -90,6 +120,24 @@ export const LineChart = ({ data, onClose, defaultLocations }) => {
     resizeObserver.observe(element);
     return () => resizeObserver.unobserve(element);
   }, []);
+
+  const getColor = d =>
+    schemeTableau10[colors[d.title] % schemeTableau10.length];
+  const getTooltip = d => (
+    <div className="tool-tip">
+      <p>
+        <b>{d['Country/Region']}</b>
+        <br />
+        {moment(d['date']).format('L')}
+        <br />
+        Confirmed: {formatNumbersTooltip(d['Confirmed'])}
+        <br />
+        Deaths: {formatNumbersTooltip(d['Deaths'])}
+        <br />
+        Recovered: {formatNumbersTooltip(d['Recovered'])}
+      </p>
+    </div>
+  );
 
   return (
     <div>
@@ -157,7 +205,7 @@ export const LineChart = ({ data, onClose, defaultLocations }) => {
           yAccessor={yValues}
           yScaleType={scaleLog}
           lineStyle={d => ({
-            stroke: schemeTableau10[colors[d.title] % schemeTableau10.length],
+            stroke: getColor(d),
           })}
           axes={[
             { orient: 'left', tickFormat: formatNumbers, ticks: 3 },
@@ -169,6 +217,8 @@ export const LineChart = ({ data, onClose, defaultLocations }) => {
           ]}
           margin={{ left: 50, bottom: 30, right: 10, top: 20 }}
           hoverAnnotation
+          tooltipContent={getTooltip}
+          annotations={annotations}
           responsiveWidth
           responsiveHeight
         />

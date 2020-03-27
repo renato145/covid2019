@@ -3,6 +3,21 @@
   max-height: 400px;
 }
 
+.tool-tip {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid #ddd;
+  color: black;
+  padding: 10px;
+  z-index: 100;
+  transform: translateX(-50%) translateY(calc(-100% - 10px));
+  min-width: 120px;
+}
+
+.custom-annotation {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .xyframe-line {
   stroke-width: 6px;
   opacity: 0.75;
