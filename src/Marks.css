@@ -8,8 +8,6 @@
 
 .marks circle {
   opacity: 0.5;
-  r: 5px;
-  transition: all 0.2s ease-out;
 }
 
 .marks circle:hover {

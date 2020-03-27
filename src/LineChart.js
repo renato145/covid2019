@@ -7,6 +7,8 @@ import {
   scaleLog,
   schemeTableau10,
 } from 'd3';
+import { Button, Col, Row } from 'react-bootstrap';
+import { AnnotationCalloutCircle } from 'react-annotation';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
 import { Marks } from './Marks';
@@ -14,7 +16,6 @@ import { useChartDimensions } from './useChartDimensions';
 import { SelectLocation } from './SelectLocation';
 import { ChartToolTip } from './ChartToolTip';
 import { ToogleSwitch } from './ToogleSwitch';
-import { Button, Col, Row } from 'react-bootstrap';
 import './LineChart.css';
 
 export const LineChart = ({
@@ -115,6 +116,35 @@ export const LineChart = ({
       return newColors;
     });
   }, [data, selection]);
+
+  const annotations = useMemo(() => {
+    if (!selectedData) return;
+    let annotations = [];
+    selectedData.forEach(d =>
+      d
+        .filter(o => o['annotation'])
+        .forEach(o => {
+          annotations.push({
+            className: 'custom-annotation',
+            x: xScale(xValues(o)),
+            y: yScale(yValues(o)),
+            dx: 40,
+            dy: 20,
+            note: {
+              title: o['Country/Region'],
+              label: o['annotation'],
+              lineType: null,
+              align: 'middle',
+              wrap: 120,
+              orientation: 'leftRight'
+            },
+            subject: {radius: 10, radiusPadding: 0}
+          });
+        })
+    );
+
+    return annotations;
+  }, [selectedData, xScale, xValues, yScale, yValues]);
 
   const marks = useMemo(() => {
     if (selectedData)
@@ -248,6 +278,9 @@ export const LineChart = ({
                     boundedWidth={boundedWidth}
                     {...yAxis}
                   />
+                  {annotations.map((props, i) => (
+                    <AnnotationCalloutCircle key={i} {...props} />
+                  ))}
                   {marks}
                 </>
               ) : (

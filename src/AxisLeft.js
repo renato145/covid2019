@@ -40,6 +40,7 @@ export const AxisLeft = ({
             transform={`translate(0,${yScale(tickValue)})`}
           >
             <line x2={-tickSize} />
+            <line className="axis-line" x2={boundedWidth} />
             <text
               key={tickValue}
               style={{ textAnchor: 'end' }}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { select, line, easeCubic } from 'd3';
+import { select, line, easeCubicOut } from 'd3';
 import { interpolatePath } from 'd3-interpolate-path';
 import { useSpring, animated } from 'react-spring';
 import { clamp } from './utils';
@@ -7,9 +7,10 @@ import './Marks.css';
 
 const Dot = ({ x, y, fill, transition, onPointerEnter, onPointerLeave }) => {
   const [style, setStyle] = useSpring(() => ({
-    config: { duration: transition, easing: easeCubic },
+    config: { duration: transition, easing: easeCubicOut },
     cx: x,
     cy: y,
+    r: 0,
     fill: fill ? fill : '#efefef',
   }));
 
@@ -17,6 +18,7 @@ const Dot = ({ x, y, fill, transition, onPointerEnter, onPointerLeave }) => {
     setStyle({
       cx: x,
       cy: y,
+      r: 5,
       fill: fill ? fill : '#efefef',
     });
   }, [setStyle, x, y, fill]);
@@ -50,6 +52,7 @@ export const Marks = ({
     select(path.current)
       .transition()
       .duration(transition)
+      .ease(easeCubicOut)
       .attrTween('d', function() {
         const prev = select(this).attr('d');
         const current = line()
