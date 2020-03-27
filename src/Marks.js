@@ -75,16 +75,16 @@ export const Marks = ({
             y={y}
             fill={color}
             transition={transition}
-            onPointerEnter={() =>
-              setToolTipData({
-                data: d,
-                x: clamp(x, marginLeft, boundedWidth - marginRight - 25),
-                y,
-                up: y > boundedHeight / 2,
-                color,
-              })
-            }
-            onPointerLeave={() => setToolTipData('')}
+            // onPointerEnter={() =>
+            //   setToolTipData({
+            //     data: d,
+            //     x: clamp(x, marginLeft, boundedWidth - marginRight - 25),
+            //     y,
+            //     up: y > boundedHeight / 2,
+            //     color,
+            //   })
+            // }
+            // onPointerLeave={() => setToolTipData('')}
           />
         );
       })}

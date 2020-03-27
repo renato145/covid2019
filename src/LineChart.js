@@ -1,4 +1,10 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react';
 import {
   scaleTime,
   extent,
@@ -17,6 +23,7 @@ import { SelectLocation } from './SelectLocation';
 import { ChartToolTip } from './ChartToolTip';
 import { ToogleSwitch } from './ToogleSwitch';
 import './LineChart.css';
+import { clamp } from './utils';
 
 export const LineChart = ({
   title,
@@ -40,9 +47,11 @@ export const LineChart = ({
     boundedWidth,
   } = dms;
 
+  const svgRef = useRef();
   const [selection, setSelection] = useState(defaultLocations);
   const [colors, setColors] = useState({});
   const [toolTipData, setToolTipData] = useState();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [switchXValue, setSwitchXValue] = useState(false);
   const [switchXAxis, setSwitchXAxis] = useState(false);
 
@@ -82,7 +91,7 @@ export const LineChart = ({
     const domain = [0.1, max(selectedData.map(d => d.map(yValues)).flat())];
     return scaleLog()
       .domain(domain)
-      .range([boundedHeight, 0])
+      .range([boundedHeight, 1])
       .nice();
   }, [selectedData, yValues, boundedHeight]);
 
@@ -136,9 +145,9 @@ export const LineChart = ({
               lineType: null,
               align: 'middle',
               wrap: 120,
-              orientation: 'leftRight'
+              orientation: 'leftRight',
             },
-            subject: {radius: 10, radiusPadding: 0}
+            subject: { radius: 10, radiusPadding: 0 },
           });
         })
     );
@@ -189,6 +198,46 @@ export const LineChart = ({
     yScale,
     yValues,
   ]);
+
+  const markPositions = useMemo(() => {
+    if (!selectedData) return;
+
+    return selectedData.map(d =>
+      d.map(o => ({
+        x: xScale(xValues(o)),
+        y: yScale(yValues(o)),
+      }))
+    );
+  }, [selectedData, xScale, xValues, yScale, yValues]);
+
+  const handleMousemove = useCallback(
+    e => {
+      if (!markPositions) return;
+      const { clientX, clientY } = e;
+      const { left, top } = svgRef.current.getBoundingClientRect();
+      const x = clientX - marginLeft - left;
+      const y = clientY - marginTop - top;
+      const distances = markPositions.map(d =>
+        d.map(o => Math.sqrt(Math.pow(o.x - x, 2) + Math.pow(o.y - y, 2)))
+      );
+      const minDistance = distances
+        .map(d =>
+          d.map((o, i) => [o, i]).reduce((acc, o) => (o[0] > acc[0] ? acc : o))
+        )
+        .map((d, i) => [d, i])
+        .reduce((acc, d) => (d[0][0] > acc[0][0] ? acc : d ));
+      const selection = selectedData[minDistance[1]][minDistance[0][1]];
+      const {x: tooltipX, y: tooltipY} = markPositions[minDistance[1]][minDistance[0][1]];
+      setToolTipData({
+        data: selection,
+        x: clamp(tooltipX, marginLeft, boundedWidth - marginRight - 25),
+        y: tooltipY,
+        up: tooltipY > boundedHeight / 2,
+        color: schemeTableau10[colors[selection['Country/Region']] % schemeTableau10.length],
+      })
+    },
+    [boundedHeight, boundedWidth, colors, marginLeft, marginRight, marginTop, markPositions, selectedData]
+  );
 
   return (
     <div className="chart">
@@ -251,7 +300,14 @@ export const LineChart = ({
       <Row className="chart-container" ref={ref}>
         <Col>
           <ChartToolTip {...toolTipData} />
-          <svg width={width} height={height}>
+          <svg
+            ref={svgRef}
+            width={width}
+            height={height}
+            onMouseMove={handleMousemove}
+            // onMouseOut={() => setToolTipData('')}
+            onMouseLeave={() => console.log('mouseLeave')}
+          >
             <g transform={`translate(${marginLeft},${marginTop})`}>
               {title && (
                 <text
