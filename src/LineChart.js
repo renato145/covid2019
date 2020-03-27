@@ -208,14 +208,14 @@ export const LineChart = ({ data, onClose, defaultLocations }) => {
             stroke: getColor(d),
           })}
           axes={[
-            { orient: 'left', tickFormat: formatNumbers, ticks: 3 },
+            { label: 'Cases' , orient: 'left', tickFormat: formatNumbers, ticks: 3 },
             {
               orient: 'bottom',
               tickFormat: d => (switchXAxis ? d : moment(d).format('Do MMM')),
               ticks: width / 130,
             },
           ]}
-          margin={{ left: 50, bottom: 30, right: 10, top: 20 }}
+          margin={{ left: 60, bottom: 30, right: 10, top: 20 }}
           hoverAnnotation
           tooltipContent={getTooltip}
           annotations={annotations}
