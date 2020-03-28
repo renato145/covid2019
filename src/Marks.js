@@ -20,7 +20,7 @@ export const Dot = ({ x, y, r, fill, transition }) => {
       r: r,
       fill: fill ? fill : '#efefef',
     });
-  }, [setStyle, x, y, fill]);
+  }, [setStyle, x, y, fill, r]);
 
   return (
     <animated.circle
@@ -57,7 +57,7 @@ export const Marks = ({
   return (
     <g className="marks">
       <path ref={path} stroke={color} />
-      {data.map((d, i) => {
+      {/* {data.map((d, i) => {
         const x = xScale(xValue(d));
         const y = yScale(yValue(d));
         return (
@@ -70,7 +70,7 @@ export const Marks = ({
             transition={transition}
           />
         );
-      })}
+      })} */}
     </g>
   );
 };

@@ -20,8 +20,8 @@ const chartConfig = {
   xAxis: {
     tickSize: 6,
     tickOffset: 15,
-    tickWidth: 45,
-    tickWidthDate: 130,
+    tickWidth: 80,
+    tickWidthDate: 140,
   },
   yAxis: {
     label: 'Cases',

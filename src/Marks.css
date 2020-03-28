@@ -1,8 +1,8 @@
 .marks {
   fill: none;
-  stroke-width: 10;
+  stroke-width: 6;
   stroke-linejoin: round;
-  stroke-opacity: 0.5;
+  stroke-opacity: 0.75;
   stroke-linecap: round;
 }
 
