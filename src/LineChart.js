@@ -24,6 +24,7 @@ import { ChartToolTip } from './ChartToolTip';
 import { ToogleSwitch } from './ToogleSwitch';
 import './LineChart.css';
 import { clamp } from './utils';
+import { Voronoi } from './Voronoi';
 
 export const LineChart = ({
   title,
@@ -200,50 +201,6 @@ export const LineChart = ({
     );
   }, [selectedData, xScale, xValues, yScale, yValues]);
 
-  const handleMousemove = useCallback(
-    (clientX, clientY) => {
-      if (!markPositions) return;
-      const { left, top } = svgRef.current.getBoundingClientRect();
-      const x = clientX - marginLeft - left;
-      const y = clientY - marginTop - top;
-      const distances = markPositions.map(d =>
-        d.map(o => Math.sqrt(Math.pow(o.x - x, 2) + Math.pow(o.y - y, 2)))
-      );
-      const minDistance = distances
-        .map(d =>
-          d.map((o, i) => [o, i]).reduce((acc, o) => (o[0] > acc[0] ? acc : o))
-        )
-        .map((d, i) => [d, i])
-        .reduce((acc, d) => (d[0][0] > acc[0][0] ? acc : d));
-      const selection = selectedData[minDistance[1]][minDistance[0][1]];
-      const { x: tooltipX, y: tooltipY } = markPositions[minDistance[1]][
-        minDistance[0][1]
-      ];
-      setToolTipData({
-        data: selection,
-        x: clamp(tooltipX, marginLeft, boundedWidth - marginRight - 25),
-        y: tooltipY,
-        tooltipX,
-        tooltipY,
-        up: tooltipY > boundedHeight / 2,
-        color:
-          schemeTableau10[
-            colors[selection['Country/Region']] % schemeTableau10.length
-          ],
-      });
-    },
-    [
-      boundedHeight,
-      boundedWidth,
-      colors,
-      marginLeft,
-      marginRight,
-      marginTop,
-      markPositions,
-      selectedData,
-    ]
-  );
-
   return (
     <div className="chart">
       <Row className="chart-selector justify-content-center">
@@ -356,20 +313,35 @@ export const LineChart = ({
             </g>
           </svg>
           <ChartToolTip {...toolTipData} />
-          <svg
-            width={width}
-            height={height}
-            onMouseMove={e => handleMousemove(e.clientX, e.clientY)}
-            onMouseLeave={() => setToolTipData('')}
-            onTouchMove={e =>
-              handleMousemove(
-                e.changedTouches[0].clientX,
-                e.changedTouches[0].clientY
-              )
-            }
-            onTouchEnd={() => setToolTipData('')}
-            style={{ position: 'absolute' }}
-          ></svg>
+          <svg width={width} height={height} style={{ position: 'absolute' }}>
+            {selectedData && (
+              <Voronoi
+                data={markPositions}
+                box={[
+                  marginLeft,
+                  marginTop,
+                  width - marginRight,
+                  height - marginBottom,
+                ]}
+                onMouseEnter={(loc,day,x,y) => {
+                  const d = selectedData[loc][day];
+                  setToolTipData({
+                    data: d,
+                    x: clamp(x, marginLeft, boundedWidth - marginRight - 25),
+                    y: y,
+                    tooltipX: x,
+                    tooltipY: y,
+                    up: y > boundedHeight / 2,
+                    color:
+                      schemeTableau10[
+                        colors[d['Country/Region']] % schemeTableau10.length
+                      ],
+                  });
+                }}
+                onMouseLeave={() => setToolTipData('')}
+              />
+            )}
+          </svg>
         </Col>
       </Row>
     </div>
