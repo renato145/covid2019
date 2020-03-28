@@ -235,6 +235,7 @@ export const LineChart = ({
         up: tooltipY > boundedHeight / 2,
         color: schemeTableau10[colors[selection['Country/Region']] % schemeTableau10.length],
       })
+      setMousePosition({x,y});
     },
     [boundedHeight, boundedWidth, colors, marginLeft, marginRight, marginTop, markPositions, selectedData]
   );
@@ -308,6 +309,10 @@ export const LineChart = ({
             // onMouseOut={() => setToolTipData('')}
             onMouseLeave={() => console.log('mouseLeave')}
           >
+            <g transform={`translate(${mousePosition.x},${mousePosition.y})`}>
+              <circle r={10} />
+
+            </g>
             <g transform={`translate(${marginLeft},${marginTop})`}>
               {title && (
                 <text
