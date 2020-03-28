@@ -2,10 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { select, line, easeCubicOut } from 'd3';
 import { interpolatePath } from 'd3-interpolate-path';
 import { useSpring, animated } from 'react-spring';
-import { clamp } from './utils';
 import './Marks.css';
 
-const Dot = ({ x, y, fill, transition, onPointerEnter, onPointerLeave }) => {
+export const Dot = ({ x, y, r, fill, transition }) => {
   const [style, setStyle] = useSpring(() => ({
     config: { duration: transition, easing: easeCubicOut },
     cx: x,
@@ -18,7 +17,7 @@ const Dot = ({ x, y, fill, transition, onPointerEnter, onPointerLeave }) => {
     setStyle({
       cx: x,
       cy: y,
-      r: 5,
+      r: r,
       fill: fill ? fill : '#efefef',
     });
   }, [setStyle, x, y, fill]);
@@ -26,8 +25,6 @@ const Dot = ({ x, y, fill, transition, onPointerEnter, onPointerLeave }) => {
   return (
     <animated.circle
       {...style}
-      onPointerEnter={onPointerEnter}
-      onPointerLeave={onPointerLeave}
     />
   );
 };
@@ -40,11 +37,6 @@ export const Marks = ({
   yValue,
   transition,
   color,
-  setToolTipData,
-  marginRight,
-  marginLeft,
-  boundedWidth,
-  boundedHeight,
 }) => {
   const path = useRef(null);
 
@@ -73,18 +65,9 @@ export const Marks = ({
             key={i}
             x={x}
             y={y}
+            r={5}
             fill={color}
             transition={transition}
-            // onPointerEnter={() =>
-            //   setToolTipData({
-            //     data: d,
-            //     x: clamp(x, marginLeft, boundedWidth - marginRight - 25),
-            //     y,
-            //     up: y > boundedHeight / 2,
-            //     color,
-            //   })
-            // }
-            // onPointerLeave={() => setToolTipData('')}
           />
         );
       })}

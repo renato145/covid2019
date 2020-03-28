@@ -36,8 +36,8 @@ const meltData = (data, name) => {
 
 const customAnnotations = {
   Peru: {
-    '3/16/20': 'Quarantine starts'
-  }
+    '3/16/20': 'Quarantine starts',
+  },
 };
 
 export const useData = () => {

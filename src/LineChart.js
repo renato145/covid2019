@@ -17,7 +17,7 @@ import { Button, Col, Row } from 'react-bootstrap';
 import { AnnotationCalloutCircle } from 'react-annotation';
 import { AxisBottom } from './AxisBottom';
 import { AxisLeft } from './AxisLeft';
-import { Marks } from './Marks';
+import { Marks, Dot } from './Marks';
 import { useChartDimensions } from './useChartDimensions';
 import { SelectLocation } from './SelectLocation';
 import { ChartToolTip } from './ChartToolTip';
@@ -174,22 +174,13 @@ export const LineChart = ({
                 yValue={yValues}
                 transition={transitions.lines}
                 color={color}
-                setToolTipData={setToolTipData}
-                marginRight={marginRight}
-                marginLeft={marginLeft}
-                boundedWidth={boundedWidth}
-                boundedHeight={boundedHeight}
               />
             );
           })}
         </>
       );
   }, [
-    boundedWidth,
-    boundedHeight,
     colors,
-    marginLeft,
-    marginRight,
     selectedData,
     transitions.lines,
     xScale,
@@ -223,18 +214,34 @@ export const LineChart = ({
           d.map((o, i) => [o, i]).reduce((acc, o) => (o[0] > acc[0] ? acc : o))
         )
         .map((d, i) => [d, i])
-        .reduce((acc, d) => (d[0][0] > acc[0][0] ? acc : d ));
+        .reduce((acc, d) => (d[0][0] > acc[0][0] ? acc : d));
       const selection = selectedData[minDistance[1]][minDistance[0][1]];
-      const {x: tooltipX, y: tooltipY} = markPositions[minDistance[1]][minDistance[0][1]];
+      const { x: tooltipX, y: tooltipY } = markPositions[minDistance[1]][
+        minDistance[0][1]
+      ];
       setToolTipData({
         data: selection,
         x: clamp(tooltipX, marginLeft, boundedWidth - marginRight - 25),
         y: tooltipY,
+        tooltipX,
+        tooltipY,
         up: tooltipY > boundedHeight / 2,
-        color: schemeTableau10[colors[selection['Country/Region']] % schemeTableau10.length],
-      })
+        color:
+          schemeTableau10[
+            colors[selection['Country/Region']] % schemeTableau10.length
+          ],
+      });
     },
-    [boundedHeight, boundedWidth, colors, marginLeft, marginRight, marginTop, markPositions, selectedData]
+    [
+      boundedHeight,
+      boundedWidth,
+      colors,
+      marginLeft,
+      marginRight,
+      marginTop,
+      markPositions,
+      selectedData,
+    ]
   );
 
   return (
@@ -301,7 +308,7 @@ export const LineChart = ({
             ref={svgRef}
             width={width}
             height={height}
-            style={{position: 'absolute'}}
+            style={{ position: 'absolute' }}
           >
             <g transform={`translate(${marginLeft},${marginTop})`}>
               {title && (
@@ -329,10 +336,19 @@ export const LineChart = ({
                     boundedWidth={boundedWidth}
                     {...yAxis}
                   />
+                  {marks}
+                  {toolTipData && (
+                    <Dot
+                      x={toolTipData.tooltipX}
+                      y={toolTipData.tooltipY}
+                      r={10}
+                      fill={toolTipData.color}
+                      transition={transitions.lines}
+                    />
+                  )}
                   {annotations.map((props, i) => (
                     <AnnotationCalloutCircle key={i} {...props} />
                   ))}
-                  {marks}
                 </>
               ) : (
                 <text>Loading...</text>
@@ -345,9 +361,14 @@ export const LineChart = ({
             height={height}
             onMouseMove={e => handleMousemove(e.clientX, e.clientY)}
             onMouseLeave={() => setToolTipData('')}
-            onTouchMove={e => handleMousemove(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
+            onTouchMove={e =>
+              handleMousemove(
+                e.changedTouches[0].clientX,
+                e.changedTouches[0].clientY
+              )
+            }
             onTouchEnd={() => setToolTipData('')}
-            style={{position: 'absolute'}}
+            style={{ position: 'absolute' }}
           ></svg>
         </Col>
       </Row>
