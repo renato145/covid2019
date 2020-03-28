@@ -51,7 +51,6 @@ export const LineChart = ({
   const [selection, setSelection] = useState(defaultLocations);
   const [colors, setColors] = useState({});
   const [toolTipData, setToolTipData] = useState();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [switchXValue, setSwitchXValue] = useState(false);
   const [switchXAxis, setSwitchXAxis] = useState(false);
 
@@ -235,7 +234,6 @@ export const LineChart = ({
         up: tooltipY > boundedHeight / 2,
         color: schemeTableau10[colors[selection['Country/Region']] % schemeTableau10.length],
       })
-      setMousePosition({x,y});
     },
     [boundedHeight, boundedWidth, colors, marginLeft, marginRight, marginTop, markPositions, selectedData]
   );
@@ -300,19 +298,12 @@ export const LineChart = ({
       </Row>
       <Row className="chart-container" ref={ref}>
         <Col>
-          <ChartToolTip {...toolTipData} />
           <svg
             ref={svgRef}
             width={width}
             height={height}
-            onMouseMove={handleMousemove}
-            // onMouseOut={() => setToolTipData('')}
-            onMouseLeave={() => console.log('mouseLeave')}
+            style={{position: 'absolute'}}
           >
-            <g transform={`translate(${mousePosition.x},${mousePosition.y})`}>
-              <circle r={10} />
-
-            </g>
             <g transform={`translate(${marginLeft},${marginTop})`}>
               {title && (
                 <text
@@ -349,6 +340,14 @@ export const LineChart = ({
               )}
             </g>
           </svg>
+          <ChartToolTip {...toolTipData} />
+          <svg
+            width={width}
+            height={height}
+            onMouseMove={handleMousemove}
+            onMouseLeave={() => setToolTipData('')}
+            style={{position: 'absolute'}}
+          ></svg>
         </Col>
       </Row>
     </div>
