@@ -129,28 +129,31 @@ export const LineChart = ({
   const annotations = useMemo(() => {
     if (!selectedData) return;
     let annotations = [];
-    selectedData.forEach(d =>
-      d
-        .filter(o => o['annotation'])
-        .forEach(o => {
-          annotations.push({
-            className: 'custom-annotation',
-            x: xScale(xValues(o)),
-            y: yScale(yValues(o)),
-            dx: 40,
-            dy: 20,
-            note: {
-              title: o['Country/Region'],
-              label: o['annotation'],
-              lineType: null,
-              align: 'middle',
-              wrap: 120,
-              orientation: 'leftRight',
-            },
-            subject: { radius: 10, radiusPadding: 0 },
-          });
-        })
-    );
+    selectedData.forEach(d => {
+      d.filter(o => o['annotation']).forEach(o => {
+        const x = xScale(xValues(o));
+        const y = yScale(yValues(o));
+        const dx = 30;
+        const dy = 20;
+        const wrap = 80;
+        annotations.push({
+          className: 'custom-annotation',
+          x,
+          y,
+          dx: (x+dx+marginLeft+wrap)>=(width-marginRight) ? -dx : dx,
+          dy,
+          note: {
+            title: o['Country/Region'],
+            label: o['annotation'],
+            lineType: null,
+            align: 'middle',
+            wrap,
+            orientation: 'leftRight',
+          },
+          subject: { radius: 10, radiusPadding: 0 },
+        });
+      });
+    });
 
     return annotations;
   }, [selectedData, xScale, xValues, yScale, yValues]);
@@ -323,7 +326,7 @@ export const LineChart = ({
                   width - marginRight,
                   height - marginBottom,
                 ]}
-                onMouseEnter={(loc,day,x,y) => {
+                onMouseEnter={(loc, day, x, y) => {
                   const d = selectedData[loc][day];
                   setToolTipData({
                     data: d,
