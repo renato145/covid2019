@@ -210,9 +210,8 @@ export const LineChart = ({
   }, [selectedData, xScale, xValues, yScale, yValues]);
 
   const handleMousemove = useCallback(
-    e => {
+    (clientX, clientY) => {
       if (!markPositions) return;
-      const { clientX, clientY } = e;
       const { left, top } = svgRef.current.getBoundingClientRect();
       const x = clientX - marginLeft - left;
       const y = clientY - marginTop - top;
@@ -344,8 +343,10 @@ export const LineChart = ({
           <svg
             width={width}
             height={height}
-            onMouseMove={handleMousemove}
+            onMouseMove={e => handleMousemove(e.clientX, e.clientY)}
             onMouseLeave={() => setToolTipData('')}
+            onTouchMove={e => handleMousemove(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
+            onTouchEnd={() => setToolTipData('')}
             style={{position: 'absolute'}}
           ></svg>
         </Col>
