@@ -88,11 +88,11 @@ export const LineChart = ({
 
   const yScale = useMemo(() => {
     if (!selectedData) return;
-    const domain = [0.1, max(selectedData.map(d => d.map(yValues)).flat())];
+    const domain = [1, max(selectedData.map(d => d.map(yValues)).flat())];
     return scaleLog()
       .domain(domain)
-      .range([boundedHeight, 1])
-      .nice();
+      .range([boundedHeight, 0])
+    .nice();
   }, [selectedData, yValues, boundedHeight]);
 
   useEffect(() => {
@@ -140,7 +140,7 @@ export const LineChart = ({
           className: 'custom-annotation',
           x,
           y,
-          dx: (x+dx+marginLeft+wrap)>=(width-marginRight) ? -dx : dx,
+          dx: x + dx + marginLeft + wrap >= width - marginRight ? -dx : dx,
           dy,
           note: {
             title: o['Country/Region'],
@@ -156,7 +156,16 @@ export const LineChart = ({
     });
 
     return annotations;
-  }, [selectedData, xScale, xValues, yScale, yValues]);
+  }, [
+    marginLeft,
+    marginRight,
+    selectedData,
+    width,
+    xScale,
+    xValues,
+    yScale,
+    yValues,
+  ]);
 
   const marks = useMemo(() => {
     if (selectedData)
@@ -303,7 +312,7 @@ export const LineChart = ({
                       y={toolTipData.tooltipY}
                       r={10}
                       fill={toolTipData.color}
-                      transition={transitions.lines}
+                      transition={transitions.highlight}
                     />
                   )}
                   {annotations.map((props, i) => (

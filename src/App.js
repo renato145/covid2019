@@ -28,10 +28,11 @@ const chartConfig = {
     labelOffset: 50,
     tickSize: 6,
     tickOffset: 10,
-    tickHeight: 100,
+    tickHeight: 80,
   },
   transitions: {
     lines: 500,
+    highlight: 100,
   },
   defaultLocations: ['Peru', 'Australia', 'Iran', 'Italy'],
 };
