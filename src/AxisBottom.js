@@ -14,7 +14,7 @@ export const AxisBottom = ({
   tickWidth,
   tickWidthDate
 }) => {
-  const range = useMemo(() => xScale.range(), [xScale]);
+  const range = useMemo(() => xScale ? xScale.range(): {}, [xScale]);
   const tickCount = useMemo(() => boundedWidth / (date ? tickWidthDate : tickWidth), [
     boundedWidth,
     tickWidth,
@@ -31,7 +31,7 @@ export const AxisBottom = ({
         // d={['M', range[0], boundedHeight+6, 'v', -6, 'H', range[1], 'v', 6].join(' ')}
         fill="none"
       />
-      {xScale.ticks(tickCount).map((tickValue, i) => (
+      {xScale && xScale.ticks(tickCount).map((tickValue, i) => (
         <g
           className="tick"
           key={i}

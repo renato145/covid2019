@@ -25,6 +25,7 @@ import { ToogleSwitch } from './ToogleSwitch';
 import './LineChart.css';
 import { clamp } from './utils';
 import { Voronoi } from './Voronoi';
+import { useD3Zoom } from './useD3Zoom';
 
 export const LineChart = ({
   title,
@@ -49,11 +50,13 @@ export const LineChart = ({
   } = dms;
 
   const svgRef = useRef();
+  const svgInteractionRef = useRef();
   const [selection, setSelection] = useState(defaultLocations);
   const [colors, setColors] = useState({});
   const [toolTipData, setToolTipData] = useState();
   const [switchXValue, setSwitchXValue] = useState(false);
   const [switchXAxis, setSwitchXAxis] = useState(false);
+  const zoomProps = useD3Zoom({ ref: svgInteractionRef });
 
   const xValues = useCallback(
     d =>
@@ -80,8 +83,8 @@ export const LineChart = ({
   const xScale = useMemo(() => {
     if (!selectedData) return;
     const domain = extent(selectedData.map(d => d.map(xValues)).flat());
-    const scale = switchXAxis ? scaleLinear : scaleTime;
-    return scale()
+    const scaleType = switchXAxis ? scaleLinear : scaleTime;
+    return scaleType()
       .domain(domain)
       .range([0, boundedWidth]);
   }, [selectedData, xValues, boundedWidth, switchXAxis]);
@@ -92,8 +95,18 @@ export const LineChart = ({
     return scaleLog()
       .domain(domain)
       .range([boundedHeight, 0])
-    .nice();
+      .nice();
   }, [selectedData, yValues, boundedHeight]);
+
+  const xScaleShow = useMemo(() => {
+    if (!xScale) return;
+    return zoomProps.rescaleX ? zoomProps.rescaleX(xScale) : xScale.copy();
+  }, [xScale, zoomProps]);
+
+  const yScaleShow = useMemo(() => {
+    if (!yScale) return;
+    return zoomProps.rescaleY ? zoomProps.rescaleY(yScale) : yScale.copy();
+  }, [yScale, zoomProps]);
 
   useEffect(() => {
     if (!data) return;
@@ -207,11 +220,11 @@ export const LineChart = ({
 
     return selectedData.map(d =>
       d.map(o => ({
-        x: xScale(xValues(o)),
-        y: yScale(yValues(o)),
+        x: xScaleShow(xValues(o)),
+        y: yScaleShow(yValues(o)),
       }))
     );
-  }, [selectedData, xScale, xValues, yScale, yValues]);
+  }, [selectedData, xScaleShow, xValues, yScaleShow, yValues]);
 
   return (
     <div className="chart">
@@ -293,31 +306,35 @@ export const LineChart = ({
               {selectedData ? (
                 <>
                   <AxisBottom
-                    xScale={xScale}
+                    xScale={xScaleShow}
                     boundedHeight={boundedHeight}
                     boundedWidth={boundedWidth}
                     date={!switchXAxis}
                     {...xAxis}
                   />
                   <AxisLeft
-                    yScale={yScale}
+                    yScale={yScaleShow}
                     boundedHeight={boundedHeight}
                     boundedWidth={boundedWidth}
                     {...yAxis}
                   />
-                  {marks}
-                  {toolTipData && (
-                    <Dot
-                      x={toolTipData.tooltipX}
-                      y={toolTipData.tooltipY}
-                      r={10}
-                      fill={toolTipData.color}
-                      transition={transitions.highlight}
-                    />
-                  )}
-                  {annotations.map((props, i) => (
-                    <AnnotationCalloutCircle key={i} {...props} />
-                  ))}
+                  <g
+                    transform={`translate(${zoomProps.x}, ${zoomProps.y}) scale(${zoomProps.k})`}
+                  >
+                    {marks}
+                    {toolTipData && (
+                      <Dot
+                        x={toolTipData.tooltipX}
+                        y={toolTipData.tooltipY}
+                        r={10}
+                        fill={toolTipData.color}
+                        transition={transitions.highlight}
+                      />
+                    )}
+                    {annotations.map((props, i) => (
+                      <AnnotationCalloutCircle key={i} {...props} />
+                    ))}
+                  </g>
                 </>
               ) : (
                 <text>Loading...</text>
@@ -325,34 +342,45 @@ export const LineChart = ({
             </g>
           </svg>
           <ChartToolTip {...toolTipData} />
-          <svg width={width} height={height} style={{ position: 'absolute' }}>
-            {selectedData && (
-              <Voronoi
-                data={markPositions}
-                box={[
-                  marginLeft,
-                  marginTop,
-                  width - marginRight,
-                  height - marginBottom,
-                ]}
-                onMouseEnter={(loc, day, x, y) => {
-                  const d = selectedData[loc][day];
-                  setToolTipData({
-                    data: d,
-                    x: clamp(x, marginLeft, boundedWidth - marginRight - 25),
-                    y: y,
-                    tooltipX: x,
-                    tooltipY: y,
-                    up: y > boundedHeight / 2,
-                    color:
-                      schemeTableau10[
-                        colors[d['Country/Region']] % schemeTableau10.length
-                      ],
-                  });
-                }}
-                onMouseLeave={() => setToolTipData('')}
-              />
-            )}
+          <svg
+            ref={svgInteractionRef}
+            width={width}
+            height={height}
+            style={{ position: 'absolute' }}
+          >
+            {/* <g transform={`translate(${marginLeft},${marginTop})`}> */}
+            <g
+              transform={`translate(${zoomProps.x}, ${zoomProps.y}) scale(${zoomProps.k})`}
+            >
+              {selectedData && (
+                <Voronoi
+                  data={markPositions}
+                  box={[marginLeft, marginTop, width-marginRight, height-marginBottom]}
+                  // box={[0, 0, width, height]}
+                  onMouseEnter={(loc, day, x, y) => {
+                    const d = selectedData[loc][day];
+                    const xShow = x;
+                    const yShow = y;
+                    // const xShow = xScaleShow(xScale.invert(x));
+                    // const yShow = yScaleShow(yScale.invert(y));
+                    setToolTipData({
+                      data: d,
+                      x: clamp(xShow, marginLeft, boundedWidth - marginRight - 25),
+                      y: yShow,
+                      tooltipX: xShow,
+                      tooltipY: yShow,
+                      up: yShow > boundedHeight / 2,
+                      color:
+                        schemeTableau10[
+                          colors[d['Country/Region']] % schemeTableau10.length
+                        ],
+                    });
+                  }}
+                  onMouseLeave={() => setToolTipData('')}
+                />
+              )}
+            {/* </g> */}
+            </g>
           </svg>
         </Col>
       </Row>
