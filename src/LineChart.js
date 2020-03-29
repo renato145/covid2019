@@ -215,25 +215,23 @@ export const LineChart = ({
     yValues,
   ]);
 
-  const voronoiData = useMemo(() => {
-    if (!selectedData) return;
-    const xShow = xScaleShow.domain().map(xScale);
-    const yShow = yScaleShow.domain().map(yScale);
-    const box = [xShow[0], yShow[1], xShow[1], yShow[0]]
-    // console.log(box);
-
-    const markPositions = selectedData.map(d => {
-      let locData = [];
-      d.forEach(o => {
-        const x = xScale(xValues(o));
-        const y = yScale(yValues(o));
-        if( x >= xShow[0] && x <= xShow[1] && y <= yShow[0] && y >= yShow[1]) locData.push({ x, y });
-      });
-      return locData;
+  const handleVoronoiMouseEnter = useCallback((loc, day, x, y) => {
+    const d = selectedData[loc][day];
+    const xShow = xScaleShow(xScale.invert(x));
+    const yShow = yScaleShow(yScale.invert(y));
+    setToolTipData({
+      data: d,
+      x: clamp(xShow, marginLeft, boundedWidth - marginRight - 25),
+      y: yShow,
+      tooltipX: x,
+      tooltipY: y,
+      up: yShow > boundedHeight / 2,
+      color:
+        schemeTableau10[colors[d['Country/Region']] % schemeTableau10.length],
     });
+  }, [boundedHeight, boundedWidth, colors, marginLeft, marginRight, selectedData, xScale, xScaleShow, yScale, yScaleShow]);
 
-    return {markPositions, box};
-  }, [selectedData, xScale, xValues, yScale, yValues, xScaleShow, yScaleShow]);
+  const handleVoronoiMouseLeave = useCallback(() => setToolTipData(''), []);
 
   return (
     <div className="chart">
@@ -363,38 +361,21 @@ export const LineChart = ({
               >
                 {selectedData && (
                   <Voronoi
-                    data={voronoiData.markPositions}
-                    // box={voronoiData.box}
-                    // box={[marginLeft, marginTop, width-marginRight, height-marginBottom]}
-                    // box={[0, 0, width-marginRight-marginLeft, height-marginBottom-marginTop]}
-                    box={[
-                      0,
-                      0,
-                      width - marginRight - marginLeft,
-                      height - marginBottom - marginTop,
-                    ]}
-                    onMouseEnter={(loc, day, x, y) => {
-                      const d = selectedData[loc][day];
-                      const xShow = xScaleShow(xScale.invert(x));
-                      const yShow = yScaleShow(yScale.invert(y));
-                      setToolTipData({
-                        data: d,
-                        x: clamp(
-                          xShow,
-                          marginLeft,
-                          boundedWidth - marginRight - 25
-                        ),
-                        y: yShow,
-                        tooltipX: x,
-                        tooltipY: y,
-                        up: yShow > boundedHeight / 2,
-                        color:
-                          schemeTableau10[
-                            colors[d['Country/Region']] % schemeTableau10.length
-                          ],
-                      });
+                    data={selectedData}
+                    onMouseEnter={handleVoronoiMouseEnter}
+                    onMouseLeave={handleVoronoiMouseLeave}
+                    {...{
+                      xValues,
+                      yValues,
+                      xScale,
+                      yScale,
+                      width,
+                      height,
+                      marginLeft,
+                      marginRight,
+                      marginBottom,
+                      marginTop,
                     }}
-                    onMouseLeave={() => setToolTipData('')}
                   />
                 )}
               </g>
