@@ -17,7 +17,7 @@ export const Voronoi = ({ data, box, onMouseEnter=() => {}, onMouseLeave= () => 
         stroke="black"
         strokeWidth={2}
         fill="red"
-        opacity={0.2}
+        opacity={0.1}
         // opacity={0}
         onMouseEnter={() => onMouseEnter(loc, day, x, y)}
         onTouchStart={() => onMouseEnter(loc, day, x, y)}

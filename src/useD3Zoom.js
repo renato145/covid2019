@@ -12,13 +12,15 @@ export const useD3Zoom = ({ ref }) => {
       setZoomProps(event.transform);
       // console.log(k,x,y);
       // console.log(event.transform);
+      // console.log(d3Zoom);
+      // console.log(d3Zoom.translateExtent());
     };
 
     const d3Zoom = zoom()
-      // .translateExtent([[0,0],[100,100]])
+      // .translateExtent([[-100,-100],[100,100]])
       // .extent([ [0, 0], [10, 10], ])
+      // .translateExtent([ [-100, -100], [1000, 500] ])
       .scaleExtent([1, 3])
-      // .translateExtent([ [0, 0], [10, 10] ])
       .on('zoom', zoomHandler);
 
     const svg = select(ref.current);

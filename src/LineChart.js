@@ -215,16 +215,25 @@ export const LineChart = ({
     yValues,
   ]);
 
-  const markPositions = useMemo(() => {
+  const voronoiData = useMemo(() => {
     if (!selectedData) return;
+    const xShow = xScaleShow.domain().map(xScale);
+    const yShow = yScaleShow.domain().map(yScale);
+    const box = [xShow[0], yShow[1], xShow[1], yShow[0]]
+    // console.log(box);
 
-    return selectedData.map(d =>
-      d.map(o => ({
-        x: xScaleShow(xValues(o)),
-        y: yScaleShow(yValues(o)),
-      }))
-    );
-  }, [selectedData, xScaleShow, xValues, yScaleShow, yValues]);
+    const markPositions = selectedData.map(d => {
+      let locData = [];
+      d.forEach(o => {
+        const x = xScale(xValues(o));
+        const y = yScale(yValues(o));
+        if( x >= xShow[0] && x <= xShow[1] && y <= yShow[0] && y >= yShow[1]) locData.push({ x, y });
+      });
+      return locData;
+    });
+
+    return {markPositions, box};
+  }, [selectedData, xScale, xValues, yScale, yValues, xScaleShow, yScaleShow]);
 
   return (
     <div className="chart">
@@ -348,38 +357,47 @@ export const LineChart = ({
             height={height}
             style={{ position: 'absolute' }}
           >
-            {/* <g transform={`translate(${marginLeft},${marginTop})`}> */}
-            <g
-              transform={`translate(${zoomProps.x}, ${zoomProps.y}) scale(${zoomProps.k})`}
-            >
-              {selectedData && (
-                <Voronoi
-                  data={markPositions}
-                  box={[marginLeft, marginTop, width-marginRight, height-marginBottom]}
-                  // box={[0, 0, width, height]}
-                  onMouseEnter={(loc, day, x, y) => {
-                    const d = selectedData[loc][day];
-                    const xShow = x;
-                    const yShow = y;
-                    // const xShow = xScaleShow(xScale.invert(x));
-                    // const yShow = yScaleShow(yScale.invert(y));
-                    setToolTipData({
-                      data: d,
-                      x: clamp(xShow, marginLeft, boundedWidth - marginRight - 25),
-                      y: yShow,
-                      tooltipX: xShow,
-                      tooltipY: yShow,
-                      up: yShow > boundedHeight / 2,
-                      color:
-                        schemeTableau10[
-                          colors[d['Country/Region']] % schemeTableau10.length
-                        ],
-                    });
-                  }}
-                  onMouseLeave={() => setToolTipData('')}
-                />
-              )}
-            {/* </g> */}
+            <g transform={`translate(${marginLeft},${marginTop})`}>
+              <g
+                transform={`translate(${zoomProps.x}, ${zoomProps.y}) scale(${zoomProps.k})`}
+              >
+                {selectedData && (
+                  <Voronoi
+                    data={voronoiData.markPositions}
+                    // box={voronoiData.box}
+                    // box={[marginLeft, marginTop, width-marginRight, height-marginBottom]}
+                    // box={[0, 0, width-marginRight-marginLeft, height-marginBottom-marginTop]}
+                    box={[
+                      0,
+                      0,
+                      width - marginRight - marginLeft,
+                      height - marginBottom - marginTop,
+                    ]}
+                    onMouseEnter={(loc, day, x, y) => {
+                      const d = selectedData[loc][day];
+                      const xShow = xScaleShow(xScale.invert(x));
+                      const yShow = yScaleShow(yScale.invert(y));
+                      setToolTipData({
+                        data: d,
+                        x: clamp(
+                          xShow,
+                          marginLeft,
+                          boundedWidth - marginRight - 25
+                        ),
+                        y: yShow,
+                        tooltipX: x,
+                        tooltipY: y,
+                        up: yShow > boundedHeight / 2,
+                        color:
+                          schemeTableau10[
+                            colors[d['Country/Region']] % schemeTableau10.length
+                          ],
+                      });
+                    }}
+                    onMouseLeave={() => setToolTipData('')}
+                  />
+                )}
+              </g>
             </g>
           </svg>
         </Col>
