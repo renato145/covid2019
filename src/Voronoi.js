@@ -52,6 +52,7 @@ export const Voronoi = ({
   }, [formatedData, box]);
 
   const paths = useMemo(() => {
+    if (!voronoiData) return;
     const { points, voronoi } = voronoiData;
     return points.map(({ x, y, loc, day }, i) => (
       <path
