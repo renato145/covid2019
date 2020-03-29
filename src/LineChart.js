@@ -49,7 +49,6 @@ export const LineChart = ({
     boundedWidth,
   } = dms;
 
-  const svgRef = useRef();
   const svgInteractionRef = useRef();
   const [selection, setSelection] = useState(defaultLocations);
   const [colors, setColors] = useState({});
@@ -215,21 +214,35 @@ export const LineChart = ({
     yValues,
   ]);
 
-  const handleVoronoiMouseEnter = useCallback((loc, day, x, y) => {
-    const d = selectedData[loc][day];
-    const xShow = xScaleShow(xScale.invert(x));
-    const yShow = yScaleShow(yScale.invert(y));
-    setToolTipData({
-      data: d,
-      x: clamp(xShow, marginLeft, boundedWidth - marginRight - 25),
-      y: yShow,
-      tooltipX: x,
-      tooltipY: y,
-      up: yShow > boundedHeight / 2,
-      color:
-        schemeTableau10[colors[d['Country/Region']] % schemeTableau10.length],
-    });
-  }, [boundedHeight, boundedWidth, colors, marginLeft, marginRight, selectedData, xScale, xScaleShow, yScale, yScaleShow]);
+  const handleVoronoiMouseEnter = useCallback(
+    (loc, day, x, y) => {
+      const d = selectedData[loc][day];
+      const xShow = xScaleShow(xScale.invert(x));
+      const yShow = yScaleShow(yScale.invert(y));
+      setToolTipData({
+        data: d,
+        x: clamp(xShow, marginLeft, boundedWidth - marginRight - 25),
+        y: yShow,
+        tooltipX: x,
+        tooltipY: y,
+        up: yShow > boundedHeight / 2,
+        color:
+          schemeTableau10[colors[d['Country/Region']] % schemeTableau10.length],
+      });
+    },
+    [
+      boundedHeight,
+      boundedWidth,
+      colors,
+      marginLeft,
+      marginRight,
+      selectedData,
+      xScale,
+      xScaleShow,
+      yScale,
+      yScaleShow,
+    ]
+  );
 
   const handleVoronoiMouseLeave = useCallback(() => setToolTipData(''), []);
 
@@ -293,12 +306,7 @@ export const LineChart = ({
       </Row>
       <Row className="chart-container" ref={ref}>
         <Col>
-          <svg
-            ref={svgRef}
-            width={width}
-            height={height}
-            style={{ position: 'absolute' }}
-          >
+          <svg width={width} height={height} style={{ position: 'absolute' }}>
             <g transform={`translate(${marginLeft},${marginTop})`}>
               {title && (
                 <text
@@ -325,26 +333,36 @@ export const LineChart = ({
                     boundedWidth={boundedWidth}
                     {...yAxis}
                   />
-                  <g
-                    transform={`translate(${zoomProps.x}, ${zoomProps.y}) scale(${zoomProps.k})`}
-                  >
-                    {marks}
-                    {toolTipData && (
-                      <Dot
-                        x={toolTipData.tooltipX}
-                        y={toolTipData.tooltipY}
-                        r={10}
-                        fill={toolTipData.color}
-                        transition={transitions.highlight}
-                      />
-                    )}
-                    {annotations.map((props, i) => (
-                      <AnnotationCalloutCircle key={i} {...props} />
-                    ))}
-                  </g>
                 </>
               ) : (
                 <text>Loading...</text>
+              )}
+            </g>
+          </svg>
+          <svg
+            width={width - marginLeft - marginRight}
+            height={height - marginTop - marginBottom}
+            style={{ position: 'absolute', marginLeft: marginLeft, marginTop: marginTop }}
+          >
+            <g>
+              {selectedData && (
+                <g
+                  transform={`translate(${zoomProps.x}, ${zoomProps.y}) scale(${zoomProps.k})`}
+                >
+                  {marks}
+                  {toolTipData && (
+                    <Dot
+                      x={toolTipData.tooltipX}
+                      y={toolTipData.tooltipY}
+                      r={10}
+                      fill={toolTipData.color}
+                      transition={transitions.highlight}
+                    />
+                  )}
+                  {annotations.map((props, i) => (
+                    <AnnotationCalloutCircle key={i} {...props} />
+                  ))}
+                </g>
               )}
             </g>
           </svg>
@@ -355,30 +373,29 @@ export const LineChart = ({
             height={height}
             style={{ position: 'absolute' }}
           >
-            <g transform={`translate(${marginLeft},${marginTop})`}>
-              <g
-                transform={`translate(${zoomProps.x}, ${zoomProps.y}) scale(${zoomProps.k})`}
-              >
-                {selectedData && (
-                  <Voronoi
-                    data={selectedData}
-                    onMouseEnter={handleVoronoiMouseEnter}
-                    onMouseLeave={handleVoronoiMouseLeave}
-                    {...{
-                      xValues,
-                      yValues,
-                      xScale,
-                      yScale,
-                      width,
-                      height,
-                      marginLeft,
-                      marginRight,
-                      marginBottom,
-                      marginTop,
-                    }}
-                  />
-                )}
-              </g>
+            <g
+              transform={`translate(${zoomProps.x + marginLeft}, ${zoomProps.y +
+                marginTop}) scale(${zoomProps.k})`}
+            >
+              {selectedData && (
+                <Voronoi
+                  data={selectedData}
+                  onMouseEnter={handleVoronoiMouseEnter}
+                  onMouseLeave={handleVoronoiMouseLeave}
+                  {...{
+                    xValues,
+                    yValues,
+                    xScale,
+                    yScale,
+                    width,
+                    height,
+                    marginLeft,
+                    marginRight,
+                    marginBottom,
+                    marginTop,
+                  }}
+                />
+              )}
             </g>
           </svg>
         </Col>
