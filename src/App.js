@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useData } from './useData';
 import { LineChart } from './LineChart';
+import { Footer } from './Footer';
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
 
@@ -64,12 +65,12 @@ function App() {
         </Row>
 
         <Row>
-          {charts.map(i => (
+          {charts.map((i) => (
             <Col key={i} md={12} xl={charts.length > 1 ? 6 : 12}>
               <LineChart
                 data={data}
                 onClose={() =>
-                  setCharts(d => {
+                  setCharts((d) => {
                     const idx = d.indexOf(i);
                     const out = d.slice();
                     out.splice(idx, 1);
@@ -85,7 +86,7 @@ function App() {
           <Col className="text-right">
             <Button
               onClick={() =>
-                setCharts(d => {
+                setCharts((d) => {
                   const idx = d.length === 0 ? 0 : d[d.length - 1] + 1;
                   return d.concat(idx);
                 })
@@ -96,16 +97,7 @@ function App() {
           </Col>
         </Row>
       </main>
-
-      <footer>
-        <Row>
-          <Col className="mt-4 text-right">
-            <a href="https://github.com/renato145/covid2019" target="_black">
-              Source code
-            </a>
-          </Col>
-        </Row>
-      </footer>
+      <Footer url="covid2019" />
     </Container>
   );
 }
